@@ -101,9 +101,9 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     /* Harnisch laden und stahlgrau einfärben */
     const pickables: THREE.Mesh[] = [];
     const byPart = new Map<string, THREE.Mesh[]>();
-    const draco = new DRACOLoader(); draco.setDecoderPath("./draco/");
+    const draco = new DRACOLoader(); draco.setDecoderPath("./draco/"); draco.setDecoderConfig({ type: "js" });
     const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
-    loader.load("./armor.glb", (gltf) => {
+    const onLoad = (gltf: { scene: THREE.Group }) => {
       if (disposed) return;
       gltf.scene.traverse((o) => {
         const m = o as THREE.Mesh;
@@ -119,7 +119,20 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       });
       scene.add(gltf.scene);
       setLoaded(true);
-    });
+    };
+    // armor.glb auf GitHub Pages. Wo .glb nicht ausgeliefert wird (Vorschau im Chat), liegt das Modell als armor.js vor.
+    const fromScript = () => {
+      const sc = document.createElement("script");
+      sc.src = "./armor.js";
+      sc.onload = () => {
+        const b64 = (window as unknown as { __ARMOR_B64?: string }).__ARMOR_B64;
+        if (!b64) return;
+        const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        loader.parse(bin.buffer, "./", onLoad);
+      };
+      document.head.appendChild(sc);
+    };
+    loader.load("./armor.glb", onLoad, undefined, fromScript);
 
     /* Leuchtende Umrandung */
     const w0 = el.clientWidth || window.innerWidth, h0 = el.clientHeight || window.innerHeight;
