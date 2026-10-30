@@ -36,7 +36,6 @@ const ANCHORS: Record<string, [number, number, number, boolean]> = {
 const PARTS: PartDef[] = [
   { id: "helm", name: "Geschlossener Helm", module: "erinnerungen" },
   { id: "brust", name: "Brustplatte", module: "gefuehle" },
-  { id: "ruecken", name: "Rückenplatte", module: "einstellungen" },
   { id: "fauld", name: "Bauchreifen und Beintaschen", module: "zyklus" },
   { id: "schulter", name: "Schulterstücke", module: "analytics" },
   { id: "arm", name: "Armzeug", module: "gewohnheiten" },
@@ -310,7 +309,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
 
   const part = PARTS.find((p) => p.id === sel);
   const mod = part ? getModule(part.module) : undefined;
-  const letter = (profile.name.trim()[0] || "?").toUpperCase();
   const motto = profile.mottos.find((m) => m.trim());
 
   return (
@@ -319,10 +317,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
-            <div className="avatar-wrap">
-              <div className="avatar-ring"><div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span>{letter}</span>}</div></div>
-              <button className="arms-badge" style={{ pointerEvents: "auto" }} onClick={() => go("wappen")} aria-label="Wappen"><CoatOfArms arms={arms} /></button>
-            </div>
+            <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Einstellungen"><CoatOfArms arms={arms} /></button>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}
           </div>

@@ -6,7 +6,6 @@ import { getModule } from "./core/modules";
 import { useStored } from "./core/db";
 import { Backdrop, Particles } from "./components/Scenery";
 import { applyFont } from "./core/fonts";
-import { applyAvatarShield } from "./core/shapes";
 import { Entwurf } from "./screens/Entwurf";
 import { Wappen } from "./screens/Wappen";
 import { getSkin, NavCtx, SkinCtx } from "./core/skins";
@@ -46,7 +45,6 @@ function useRoute() {
 export default function App() {
   const [id, go] = useRoute();
   const [skinId, setSkinId] = useStored<string>("skin", "glanz");
-  const [avatarShield, setAvatarShield] = useStored<string>("avatarShield", "giebel");
   const [homeMode] = useStored<string>("homeMode", "kacheln");
   const skin = getSkin(skinId);
 
@@ -54,7 +52,6 @@ export default function App() {
     document.documentElement.setAttribute("data-skin", skin.id);
   }, [skin.id]);
   useEffect(() => applyFont(), []);
-  useEffect(() => applyAvatarShield(avatarShield), [avatarShield]);
 
   const mod = id ? getModule(id) : undefined;
   const Screen = mod ? screenFor(mod.id) : null;
@@ -72,9 +69,9 @@ export default function App() {
         <Particles mode={skin.particles} skinId={skin.id} />
         <div className="app">
           {id === "wappen" ? (
-            <Wappen back={() => go("")} />
+            <Wappen back={() => go("einstellungen")} />
           ) : id === "entwurf" ? (
-            <Entwurf back={() => go("einstellungen")} shield={avatarShield} chooseShield={setAvatarShield} />
+            <Entwurf back={() => go("einstellungen")} />
           ) : id === "stile" ? (
             <Stile back={() => go("einstellungen")} current={skin.id} choose={setSkinId} />
           ) : mod && Screen ? (

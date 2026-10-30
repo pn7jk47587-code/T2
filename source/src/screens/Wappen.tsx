@@ -1,27 +1,28 @@
+import { useState } from "react";
 import { Icon } from "../components/Icon";
 import { useStored } from "../core/db";
-import { CHARGES, CHARGE_NAMES, CoatOfArms, DEFAULT_ARMS, DIVISIONS, TINCTURES } from "../core/heraldry";
+import { CHARGES, CoatOfArms, DEFAULT_ARMS, DIVISIONS, TINCTURES } from "../core/heraldry";
 import { SHIELDS } from "../core/shields";
 import type { Arms } from "../core/types";
 
-/** Wappen gestalten: Form, Teilung, Farben, Wappenbild. */
+const STEPS = ["Form", "Teilung", "Symbol", "Farben"] as const;
+
+function Swatches({ value, onPick }: { value: string; onPick: (id: string) => void }) {
+  return (
+    <div className="wp-sws">
+      {TINCTURES.map((t) => (
+        <button key={t.id} type="button" className={"wp-sw" + (value === t.id ? " on" : "")} style={{ background: t.hex }} onClick={() => onPick(t.id)} aria-label={t.name} title={t.name} />
+      ))}
+    </div>
+  );
+}
+
+/** Wappen in vier Schritten: Form, Teilung, Symbol, Farben. */
 export function Wappen({ back }: { back: () => void }) {
   const [arms, setArms] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [step, setStep] = useState(0);
   const set = (p: Partial<Arms>) => setArms((a) => ({ ...a, ...p }));
-
-  const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <>
-      <div className="section eyebrow">{label}</div>
-      <div className="wp-row">{children}</div>
-    </>
-  );
-  const Swatches = ({ value, onPick }: { value: string; onPick: (id: string) => void }) => (
-    <>
-      {TINCTURES.map((t) => (
-        <button key={t.id} className={"wp-sw" + (value === t.id ? " on" : "")} style={{ background: t.hex }} onClick={() => onPick(t.id)} aria-label={t.name} title={t.name} />
-      ))}
-    </>
-  );
+  const a: Arms = { ...DEFAULT_ARMS, ...arms };
 
   return (
     <>
@@ -29,32 +30,77 @@ export function Wappen({ back }: { back: () => void }) {
         <button className="back" onClick={back} aria-label="Zurück"><Icon name="back" /></button>
         <h1>Wappen</h1>
       </div>
-      <div className="wp-preview"><CoatOfArms arms={arms} /></div>
 
-      <Row label="Form">
-        {SHIELDS.map((s) => (
-          <button key={s.id} className={"wp-opt" + (arms.shape === s.id ? " on" : "")} onClick={() => set({ shape: s.id })} aria-label={s.name}>
-            <CoatOfArms arms={{ ...arms, shape: s.id }} />
+      <div className="wp-steps">
+        {STEPS.map((s, i) => (
+          <button key={s} type="button" className={"wp-step" + (i === step ? " on" : "") + (i < step ? " past" : "")} onClick={() => setStep(i)}>
+            <span>{i + 1}</span>{s}
           </button>
         ))}
-      </Row>
-      <Row label="Teilung">
-        {DIVISIONS.map((d) => (
-          <button key={d.id} className={"wp-opt" + (arms.division === d.id ? " on" : "")} onClick={() => set({ division: d.id })} aria-label={d.name}>
-            <CoatOfArms arms={{ ...arms, division: d.id, charge: "keins" }} />
-          </button>
-        ))}
-      </Row>
-      <Row label="Feld"><Swatches value={arms.c1} onPick={(c1) => set({ c1 })} /></Row>
-      <Row label="Teilungsfarbe"><Swatches value={arms.c2} onPick={(c2) => set({ c2 })} /></Row>
-      <Row label="Wappenbild">
-        {Object.keys(CHARGES).map((c) => (
-          <button key={c} className={"wp-opt" + (arms.charge === c ? " on" : "")} onClick={() => set({ charge: c })} aria-label={CHARGE_NAMES[c] ?? c}>
-            <CoatOfArms arms={{ ...arms, charge: c }} />
-          </button>
-        ))}
-      </Row>
-      <Row label="Farbe des Wappenbilds"><Swatches value={arms.cc} onPick={(cc) => set({ cc })} /></Row>
+      </div>
+
+      <div className="wp-preview"><CoatOfArms arms={a} /></div>
+
+      {step === 0 && (
+        <div className="wp-grid">
+          {SHIELDS.map((s) => (
+            <button key={s.id} type="button" className={"wp-opt" + (a.shape === s.id ? " on" : "")} onClick={() => set({ shape: s.id })}>
+              <CoatOfArms arms={{ ...a, shape: s.id, division: "einfarbig", charge: "keins" }} />
+              <small>{s.name}</small>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {step === 1 && (
+        <div className="wp-grid">
+          {DIVISIONS.map((d) => (
+            <button key={d.id} type="button" className={"wp-opt" + (a.division === d.id ? " on" : "")} onClick={() => set({ division: d.id })}>
+              <CoatOfArms arms={{ ...a, division: d.id, charge: "keins" }} />
+              <small>{d.name}</small>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="wp-grid">
+          {CHARGES.map((c) => (
+            <button key={c.id} type="button" className={"wp-opt" + (a.charge === c.id ? " on" : "")} onClick={() => set({ charge: c.id })}>
+              <CoatOfArms arms={{ ...a, charge: c.id }} />
+              <small>{c.name}</small>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="card" style={{ padding: "6px 14px 14px" }}>
+          <div className="section eyebrow">Feld</div>
+          <Swatches value={a.c1} onPick={(c1) => set({ c1 })} />
+          {a.division !== "einfarbig" && (
+            <>
+              <div className="section eyebrow">Teilung</div>
+              <Swatches value={a.c2} onPick={(c2) => set({ c2 })} />
+            </>
+          )}
+          {a.charge !== "keins" && (
+            <>
+              <div className="section eyebrow">Symbol</div>
+              <Swatches value={a.cc} onPick={(cc) => set({ cc })} />
+            </>
+          )}
+          <div className="section eyebrow">Rand</div>
+          <Swatches value={a.bc ?? "silber"} onPick={(bc) => set({ bc })} />
+        </div>
+      )}
+
+      <div className="wp-nav">
+        {step > 0 ? <button type="button" className="btn ghost" onClick={() => setStep(step - 1)}>Zurück</button> : <span />}
+        {step < STEPS.length - 1
+          ? <button type="button" className="btn" onClick={() => setStep(step + 1)}>Weiter</button>
+          : <button type="button" className="btn" onClick={back}>Fertig</button>}
+      </div>
     </>
   );
 }

@@ -29,11 +29,6 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
             placeholder={"Erster Spruch\nZweiter Spruch"}
           />
         </div>
-        {profile.photo && (
-          <button className="btn ghost small danger" onClick={() => setProfile((p) => ({ ...p, photo: undefined }))}>
-            Profilbild entfernen
-          </button>
-        )}
       </div>
 
       <div className="section eyebrow">Stil</div>
@@ -45,7 +40,7 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
       </button>
 
       <button className="card row" style={{ width: "100%", textAlign: "left", marginTop: 8 }} onClick={() => nav("entwurf")}>
-        <div className="t">Profilschild, Wappen, Symbole</div>
+        <div className="t">Wappenformen, Symbole</div>
         <span className="chip">Entwurf</span>
       </button>
 

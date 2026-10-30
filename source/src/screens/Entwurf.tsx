@@ -1,14 +1,11 @@
 import { useId } from "react";
 import { Icon } from "../components/Icon";
-import { POINTED, SHIELDS } from "../core/shields";
+import { SHIELDS } from "../core/shields";
 import { ICONS } from "../core/icons";
 import { modules } from "../core/modules";
-import { useStored } from "../core/db";
-import type { Profile } from "../core/types";
 
 /** Designentwurf: Frakturschriften, Wappenformen, Symbole, Bedienelemente. */
-export function Entwurf({ back, shield, chooseShield }: { back: () => void; shield: string; chooseShield: (id: string) => void }) {
-  const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
+export function Entwurf({ back }: { back: () => void }) {
   const gid = useId().replace(/:/g, "");
   const ids = Object.keys(ICONS);
 
@@ -17,18 +14,6 @@ export function Entwurf({ back, shield, chooseShield }: { back: () => void; shie
       <div className="topbar">
         <button className="back" onClick={back} aria-label="Zurück"><Icon name="back" /></button>
         <h1>Entwurf</h1>
-      </div>
-
-      <div className="section eyebrow">Profilschild</div>
-      <div className="ew-avatars">
-        {POINTED.map((sh) => (
-          <button key={sh.id} className={"ew-avatar" + (shield === sh.id ? " on" : "")} onClick={() => chooseShield(sh.id)}>
-            <div className="avatar-ring" style={{ "--avatar-mask": `var(--shield-${sh.id})`, "--avatar-w": "60px", "--avatar-h": "72px" } as React.CSSProperties}>
-              <div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span style={{ fontSize: 26 }}>{(profile.name.trim()[0] || "?").toUpperCase()}</span>}</div>
-            </div>
-            <span>{sh.name}</span>
-          </button>
-        ))}
       </div>
 
       <div className="section eyebrow">Wappenformen</div>

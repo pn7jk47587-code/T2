@@ -81,4 +81,6 @@ export interface Arms {
   c2: string;
   charge: string;
   cc: string;
+  /** Farbe des Schildrands */
+  bc?: string;
 }

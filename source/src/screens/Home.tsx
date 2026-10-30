@@ -1,10 +1,8 @@
-import { useRef } from "react";
 import { Icon } from "../components/Icon";
 import { modules } from "../core/modules";
 import { useStored } from "../core/db";
 import { useOverviewValues } from "../core/overview";
 import type { Profile } from "../core/types";
-import { resizeImage } from "../core/image";
 import { useSkin } from "../core/skins";
 import { getShield } from "../core/shields";
 import { useId } from "react";
@@ -26,9 +24,8 @@ function today() {
 }
 
 export function Home({ go }: { go: (id: string) => void }) {
-  const [profile, setProfile] = useStored<Profile>("profile", defaultProfile);
+  const [profile] = useStored<Profile>("profile", defaultProfile);
   const [mottoIdx, setMottoIdx] = useStored<number>("mottoIdx", 0);
-  const fileRef = useRef<HTMLInputElement>(null);
   const skin = useSkin();
   const ov = useOverviewValues();
   const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
@@ -38,30 +35,12 @@ export function Home({ go }: { go: (id: string) => void }) {
   const mottos = profile.mottos.filter((m) => m.trim());
   const motto = mottos.length ? mottos[mottoIdx % mottos.length] : "";
 
-  async function pickPhoto(file?: File) {
-    if (!file) return;
-    const photo = await resizeImage(file, 512);
-    setProfile((p) => ({ ...p, photo }));
-  }
-
   return (
     <>
       <header className="profile">
-        <div className="avatar-wrap">
-          <button className="avatar-ring" onClick={() => fileRef.current?.click()} aria-label="Profilbild ändern">
-            <div className="avatar">
-              {profile.photo ? <img src={profile.photo} alt="" /> : <span>{(profile.name.trim()[0] || "?").toUpperCase()}</span>}
-            </div>
-          </button>
-          <button className="arms-badge" onClick={() => go("wappen")} aria-label="Wappen"><CoatOfArms arms={arms} /></button>
-        </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => pickPhoto(e.target.files?.[0])}
-        />
+        <button className="arms-main" onClick={() => go("einstellungen")} aria-label="Einstellungen">
+          <CoatOfArms arms={arms} />
+        </button>
         <h1>{profile.name}</h1>
         <button
           className={"motto" + (motto ? "" : " placeholder")}
@@ -94,7 +73,7 @@ export function Home({ go }: { go: (id: string) => void }) {
       </section>
 
       <nav className="grid" aria-label="Module">
-        {modules.map((m) => (
+        {modules.filter((m) => m.id !== "einstellungen").map((m) => (
           <button
             key={m.id}
             className={"tile" + (shield ? " shielded" : "")}
