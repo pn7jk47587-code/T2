@@ -14,7 +14,6 @@
   --ring-radius: 50%; --btn-shadow: none; --tile-shadow: none; --tile-border: 1px solid var(--line);
   --tile-radius: 12px; --tile-inner-radius: 8px; --tile-inner: 1px solid transparent;
   --tile-inner-inset: 6px; --tile-inner-clip: none; --tile-inner-bg: none; --m1: none; --m2: none;
-  --avatar-mask: none; --avatar-w: 132px; --avatar-h: 132px;
   --burgund: #8e1a2e; --burgund-hell: #b3243b; --rune: #e0263f;
   --silber: #c9ced3;
   --icon-filter: drop-shadow(0 0 var(--icon-glow) color-mix(in srgb, var(--a) 80%, transparent));
@@ -136,7 +135,6 @@
   --scene: radial-gradient(640px 520px at 50% 0%, rgba(142,26,46,.18), transparent 70%), linear-gradient(180deg, var(--bg-2), var(--bg) 75%);
   --ring: linear-gradient(170deg, #ffffff, #8a9097 45%, #eef0f2 55%, #6f767d);
   --ring-shadow: none; --ring-radius: 0;
-  --avatar-mask: var(--shield-dreieck); --avatar-w: 118px; --avatar-h: 142px;
   --avatar-bg: linear-gradient(145deg, #3b3e42, #101113);
   --tile-radius: 0; --tile-inner-radius: 0; --tile-bg: none; --tile-border: none; --tile-inner: none;
   --tile-ink: #17181a; --icon-sw: 1.8;
@@ -145,4 +143,4 @@
   --icon-filter: drop-shadow(0 1px 0 rgba(255,255,255,.7));
 }
 .backdrop[data-skin="wappen"] .bd2 { display: block; inset: auto 0 0 0; height: 60%; opacity: .05;
-  -webkit-mask: var(--shield-dreieck) center / 70% 100% no-repeat; mask: var(--shield-dreieck) center / 70% 100% no-repeat; background: #fff; }
+  -webkit-mask: var(--shield-giebel) center / 70% 100% no-repeat; mask: var(--shield-giebel) center / 70% 100% no-repeat; background: #fff; }

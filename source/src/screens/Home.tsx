@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Icon } from "../components/Icon";
 import { modules } from "../core/modules";
 import { useStored } from "../core/db";
+import { useOverviewValues } from "../core/overview";
 import type { Profile } from "../core/types";
 import { resizeImage } from "../core/image";
 import { useSkin } from "../core/skins";
@@ -27,6 +28,7 @@ export function Home({ go }: { go: (id: string) => void }) {
   const [mottoIdx, setMottoIdx] = useStored<number>("mottoIdx", 0);
   const fileRef = useRef<HTMLInputElement>(null);
   const skin = useSkin();
+  const ov = useOverviewValues();
   const gid = useId().replace(/:/g, "");
   const shield = skin.shield ? getShield(skin.shield) : null;
 
@@ -78,7 +80,7 @@ export function Home({ go }: { go: (id: string) => void }) {
         <div className="metrics">
           {overviewItems.map((m) => (
             <div className="metric" key={m.id}>
-              <b>–</b>
+              <b>{ov[m.id] ?? "–"}</b>
               <small>{m.label}</small>
             </div>
           ))}

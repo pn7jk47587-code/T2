@@ -45,7 +45,7 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
       </button>
 
       <button className="card row" style={{ width: "100%", textAlign: "left", marginTop: 8 }} onClick={() => nav("entwurf")}>
-        <div className="t">Schrift, Wappen, Symbole</div>
+        <div className="t">Profilschild, Wappen, Symbole</div>
         <span className="chip">Entwurf</span>
       </button>
 

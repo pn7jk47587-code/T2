@@ -47,3 +47,17 @@ export interface StoredItem {
 export type Route =
   | { name: "home" }
   | { name: "module"; id: string };
+
+/** Eine Erinnerung */
+export interface Reminder {
+  id: string;
+  title: string;
+  category: string;
+  /** YYYY-MM-DD */
+  date?: string;
+  /** HH:MM */
+  time?: string;
+  done: boolean;
+  createdAt: number;
+  doneAt?: number;
+}

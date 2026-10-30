@@ -8,3 +8,8 @@ export function installShields() {
     r.setProperty(`--shield-${sh.id}`, `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
   }
 }
+
+/** Profilbild als Schild: Form als Maske für alle Stile. */
+export function applyAvatarShield(id: string) {
+  document.documentElement.style.setProperty("--avatar-mask", `var(--shield-${id})`);
+}

@@ -14,6 +14,7 @@ import { ICONS } from "../core/icons";
 import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
+import { useOverviewValues } from "../core/overview";
 import { useSkin } from "../core/skins";
 import type { Profile } from "../core/types";
 
@@ -26,18 +27,18 @@ interface PartDef { id: string; name: string; module: string }
 
 /** Ankerpunkte der Runen (Meter, Boden y=0). Bei Paaren wird die Seite gewählt, die zur Kamera zeigt. */
 const ANCHORS: Record<string, [number, number, number, boolean]> = {
-  helm: [0, 1.74, 0, false], brust: [0.08, 1.3, 0, false], ruecken: [0.08, 1.3, 0, false], fauld: [-0.12, 0.8, 0, false],
+  helm: [0, 1.7, 0.05, false], brust: [0.09, 1.33, 0, false], ruecken: [0.08, 1.3, 0, false], fauld: [-0.12, 0.8, 0, false],
   schulter: [0.25, 1.42, 0, true], arm: [0.27, 1.12, 0, true], hand: [0.27, 0.9, 0, true], bein: [0.11, 0.42, 0, true], schuh: [0.12, 0.07, 0.08, true],
 };
 
 const PARTS: PartDef[] = [
-  { id: "helm", name: "Geschlossener Helm", module: "gefuehle" },
-  { id: "brust", name: "Brustplatte", module: "zyklus" },
+  { id: "helm", name: "Geschlossener Helm", module: "erinnerungen" },
+  { id: "brust", name: "Brustplatte", module: "gefuehle" },
   { id: "ruecken", name: "Rückenplatte", module: "einstellungen" },
-  { id: "fauld", name: "Bauchreifen und Beintaschen", module: "finanzen" },
+  { id: "fauld", name: "Bauchreifen und Beintaschen", module: "zyklus" },
   { id: "schulter", name: "Schulterstücke", module: "analytics" },
-  { id: "arm", name: "Armzeug", module: "erinnerungen" },
-  { id: "hand", name: "Panzerhandschuhe", module: "gewohnheiten" },
+  { id: "arm", name: "Armzeug", module: "gewohnheiten" },
+  { id: "hand", name: "Panzerhandschuhe", module: "finanzen" },
   { id: "bein", name: "Beinzeug", module: "archiv" },
   { id: "schuh", name: "Eisenschuhe", module: "fundorte" },
 ];
@@ -84,6 +85,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const [loaded, setLoaded] = useState(false);
   const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
   const skin = useSkin();
+  const ov = useOverviewValues();
   const goRef = useRef(go);
   goRef.current = go;
 
@@ -188,8 +190,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     let focus: { c: THREE.Vector3; d: number; speed: number } | null = null;
     let selected: string | null = null;
     let selT = 0;
-    let hint: { id: string; t: number } | null = null;
-    let nextHint = 5000, hintIdx = 0;
     let busy = false;
 
     function centerOf(id: string) {
@@ -237,7 +237,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
 
     api.current.select = (id, at) => {
       if (busy) return;
-      selected = id; setSel(id); selT = performance.now(); hint = null;
+      selected = id; setSel(id); selT = performance.now();
       clearRune(); if (id) placeRune(id, at);
       controls.autoRotate = false;
       if (!id) { outline.selectedObjects = []; focus = { c: home.clone(), d: 5.6, speed: 0.07 }; return; }
@@ -285,16 +285,11 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       controls.update();
       if (selected) {
         const dt = t - selT;
-        outline.edgeStrength = 3.2 + 7 * Math.exp(-dt / 280) + 0.5 * Math.sin(t / 420);
-        outline.edgeGlow = 1.2 + 1.6 * Math.exp(-dt / 350);
-        const rm = runeMat(); if (rm) rm.opacity = Math.min(1, dt / 180) * (0.75 + 0.25 * Math.sin(t / 380));
-      } else if (hint) {
-        const p = (t - hint.t) / 1500;
-        if (p >= 1) { hint = null; outline.selectedObjects = []; outline.edgeStrength = 0; }
-        else outline.edgeStrength = 2.2 * Math.sin(Math.PI * p);
-      } else if (!busy && pickables.length && t > nextHint) {
-        const id = PARTS[hintIdx++ % PARTS.length].id;
-        hint = { id, t }; outline.selectedObjects = byPart.get(id) ?? []; nextHint = t + 5200;
+        outline.edgeStrength = 2.2 * Math.min(1, dt / 350);
+        outline.edgeGlow = 0.9;
+        const rm = runeMat(); if (rm) rm.opacity = Math.min(1, dt / 400);
+      } else {
+        outline.edgeStrength = 0;
       }
       composer.render();
     };
@@ -321,13 +316,13 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
-            <div className="rk-avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span>{letter}</span>}</div>
+            <div className="avatar-ring"><div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span>{letter}</span>}</div></div>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}
           </div>
           <div className="metrics rk-metrics">
             {overviewItems.map((m) => (
-              <div className="metric" key={m.id}><b>–</b><small>{m.label}</small></div>
+              <div className="metric" key={m.id}><b>{ov[m.id] ?? "–"}</b><small>{m.label}</small></div>
             ))}
           </div>
         </div>

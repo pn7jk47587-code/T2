@@ -27,4 +27,6 @@ export const ICONS: Record<string, string[]> = {
 export const UI_ICONS: Record<string, string[]> = {
   back: ["m14.5 5.5-6.5 6.5 6.5 6.5"],
   trash: ["M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.5h9.4L17.5 7"],
+  kalender: ["M4.5 6.5h15v13h-15z", "M4.5 10.5h15", "M8.5 4v4M15.5 4v4", "M12 13v4M10 15h4"],
+  haken: ["m6 12.5 4 4 8-9"],
 };

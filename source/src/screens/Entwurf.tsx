@@ -1,14 +1,13 @@
 import { useId } from "react";
 import { Icon } from "../components/Icon";
-import { FONTS } from "../core/fonts";
-import { SHIELDS } from "../core/shields";
+import { POINTED, SHIELDS } from "../core/shields";
 import { ICONS } from "../core/icons";
 import { modules } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Profile } from "../core/types";
 
 /** Designentwurf: Frakturschriften, Wappenformen, Symbole, Bedienelemente. */
-export function Entwurf({ back, font, chooseFont }: { back: () => void; font: string; chooseFont: (id: string) => void }) {
+export function Entwurf({ back, shield, chooseShield }: { back: () => void; shield: string; chooseShield: (id: string) => void }) {
   const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
   const gid = useId().replace(/:/g, "");
   const ids = Object.keys(ICONS);
@@ -20,14 +19,14 @@ export function Entwurf({ back, font, chooseFont }: { back: () => void; font: st
         <h1>Entwurf</h1>
       </div>
 
-      <div className="section eyebrow">Schrift</div>
-      <div className="list">
-        {FONTS.map((f) => (
-          <button key={f.id} className={"card ew-font" + (font === f.id ? " on" : "")} onClick={() => chooseFont(f.id)}>
-            <span className="ew-font-name">{f.name}</span>
-            <span className="ew-font-big" style={{ fontFamily: f.family, fontWeight: f.weight }}>{profile.name}</span>
-            <span className="ew-font-small" style={{ fontFamily: f.family, fontWeight: f.weight }}>Tagesüberblick · Gefühle · Rüstkammer</span>
-            <span className="ew-font-small" style={{ fontFamily: f.family, fontWeight: f.weight }}>ÄÖÜ äöü ß 1555</span>
+      <div className="section eyebrow">Profilschild</div>
+      <div className="ew-avatars">
+        {POINTED.map((sh) => (
+          <button key={sh.id} className={"ew-avatar" + (shield === sh.id ? " on" : "")} onClick={() => chooseShield(sh.id)}>
+            <div className="avatar-ring" style={{ "--avatar-mask": `var(--shield-${sh.id})`, "--avatar-w": "60px", "--avatar-h": "72px" } as React.CSSProperties}>
+              <div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span style={{ fontSize: 26 }}>{(profile.name.trim()[0] || "?").toUpperCase()}</span>}</div>
+            </div>
+            <span>{sh.name}</span>
           </button>
         ))}
       </div>

@@ -18,7 +18,7 @@ export const skins: Skin[] = [
   { id: "glanz", name: "Glanz", particles: "sparks" },
   { id: "burgund", name: "Burgund", particles: "embers" },
   { id: "schlicht", name: "Schlicht", particles: "none" },
-  { id: "wappen", name: "Wappen", particles: "none", shield: "dreieck" },
+  { id: "wappen", name: "Wappen", particles: "none", shield: "giebel" },
 ];
 
 export const getSkin = (id: string) => skins.find((s) => s.id === id) ?? skins[1];
