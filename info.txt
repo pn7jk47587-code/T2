@@ -1,0 +1,92 @@
+-rw-r--r-- 1 runner runner 26650800 Oct 30 12:38 henry2.glb
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+ OVERVIEW
+ ────────────────────────────────────────────
+┌────────────────────┬──────────────────────────────────────────────────────────────────────┐
+│ key                │ value                                                                │
+├────────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ version            │ 2.0                                                                  │
+├────────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ generator          │ Model optimized and converted by VNTANA Inc. https://www.vntana.com/ │
+├────────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ extensionsUsed     │ KHR_draco_mesh_compression                                           │
+├────────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ extensionsRequired │ KHR_draco_mesh_compression                                           │
+└────────────────────┴──────────────────────────────────────────────────────────────────────┘
+
+
+
+ SCENES
+ ────────────────────────────────────────────
+┌───┬─────────┬────────────┬──────────────────────────────┬───────────────────────────┬────────────────────┬───────────────────┬────────────────────────┐
+│ # │ name    │ rootName   │ bboxMin                      │ bboxMax                   │ renderVertexCount¹ │ uploadVertexCount │ uploadNaiveVertexCount │
+├───┼─────────┼────────────┼──────────────────────────────┼───────────────────────────┼────────────────────┼───────────────────┼────────────────────────┤
+│ 0 │ Default │ Armor_0127 │ -0.36103, -1.05809, -0.26527 │ 0.35097, 0.84484, 0.29484 │ 6,654,114          │ 1,896,944         │ 1,896,944              │
+└───┴─────────┴────────────┴──────────────────────────────┴───────────────────────────┴────────────────────┴───────────────────┴────────────────────────┘
+
+¹ Expected number of vertices processed by the vertex shader for one render
+  pass, without considering the vertex cache.
+
+² Expected number of vertices uploaded to GPU, assuming each Accessor
+  is uploaded only once. Actual number uploaded may be higher, 
+  dependent on the implementation and vertex buffer layout.
+
+³ Expected number of vertices uploaded to GPU, assuming each Primitive
+  is uploaded once, duplicating vertex attributes shared among Primitives.
+
+
+
+ MESHES
+ ────────────────────────────────────────────
+┌───┬─────────────┬───────────┬────────────────┬──────────────┬───────────┬──────────┬─────────────────────────────────────────────────────────────────────────────────┬───────────┬───────────┐
+│ # │ name        │ mode      │ meshPrimitives │ glPrimitives │ vertices  │ indices  │ attributes                                                                      │ instances │ size¹     │
+├───┼─────────────┼───────────┼────────────────┼──────────────┼───────────┼──────────┼─────────────────────────────────────────────────────────────────────────────────┼───────────┼───────────┤
+│ 0 │ A19_mdl_n3d │ TRIANGLES │ 3              │ 2,218,038    │ 1,896,944 │ u16, u32 │ NORMAL:f32, POSITION:f32, TANGENT:f32, TEXCOORD_0:u16_norm, TEXCOORD_1:u16_norm │ 1         │ 109.21 MB │
+└───┴─────────────┴───────────┴────────────────┴──────────────┴───────────┴──────────┴─────────────────────────────────────────────────────────────────────────────────┴───────────┴───────────┘
+
+⁴ size estimates GPU memory required by a mesh, in isolation. If accessors are
+  shared by other mesh primitives, but the meshes themselves are not reused, then
+  the sum of all mesh sizes will overestimate the asset's total size. See "dedup".
+
+
+
+ MATERIALS
+ ────────────────────────────────────────────
+┌───┬──────┬───────────┬─────────────────────────────────────────────────────────────────────────────┬───────────┬─────────────┐
+│ # │ name │ instances │ textures                                                                    │ alphaMode │ doubleSided │
+├───┼──────┼───────────┼─────────────────────────────────────────────────────────────────────────────┼───────────┼─────────────┤
+│ 0 │      │ 1         │ baseColorTexture, normalTexture, occlusionTexture, metallicRoughnessTexture │ OPAQUE    │ ✓           │
+├───┼──────┼───────────┼─────────────────────────────────────────────────────────────────────────────┼───────────┼─────────────┤
+│ 1 │      │ 1         │ baseColorTexture, normalTexture, occlusionTexture, metallicRoughnessTexture │ OPAQUE    │             │
+├───┼──────┼───────────┼─────────────────────────────────────────────────────────────────────────────┼───────────┼─────────────┤
+│ 2 │      │ 1         │ baseColorTexture, occlusionTexture, metallicRoughnessTexture                │ OPAQUE    │             │
+└───┴──────┴───────────┴─────────────────────────────────────────────────────────────────────────────┴───────────┴─────────────┘
+
+
+
+ TEXTURES
+ ────────────────────────────────────────────
+┌───┬──────┬─────┬────────────────────────────────────────────┬───────────┬────────────┬─────────────┬────────────┬──────────┬───────────┐
+│ # │ name │ uri │ slots                                      │ instances │ mimeType   │ compression │ resolution │ size     │ gpuSize⁵  │
+├───┼──────┼─────┼────────────────────────────────────────────┼───────────┼────────────┼─────────────┼────────────┼──────────┼───────────┤
+│ 0 │      │     │ baseColorTexture                           │ 1         │ image/jpeg │             │ 256x256    │ 12.66 KB │ 349.52 KB │
+├───┼──────┼─────┼────────────────────────────────────────────┼───────────┼────────────┼─────────────┼────────────┼──────────┼───────────┤
+│ 1 │      │     │ metallicRoughnessTexture                   │ 1         │ image/jpeg │             │ 512x512    │ 31.4 KB  │ 1.4 MB    │
+├───┼──────┼─────┼────────────────────────────────────────────┼───────────┼────────────┼─────────────┼────────────┼──────────┼───────────┤
+│ 2 │      │     │ baseColorTexture                           │ 2         │ image/jpeg │             │ 4096x4096  │ 2.08 MB  │ 89.48 MB  │
+├───┼──────┼─────┼────────────────────────────────────────────┼───────────┼────────────┼─────────────┼────────────┼──────────┼───────────┤
+│ 3 │      │     │ occlusionTexture, metallicRoughnessTexture │ 3         │ image/jpeg │             │ 4096x4096  │ 1.69 MB  │ 89.48 MB  │
+├───┼──────┼─────┼────────────────────────────────────────────┼───────────┼────────────┼─────────────┼────────────┼──────────┼───────────┤
+│ 4 │      │     │ normalTexture                              │ 2         │ image/jpeg │             │ 4096x4096  │ 2.4 MB   │ 89.48 MB  │
+└───┴──────┴─────┴────────────────────────────────────────────┴───────────┴────────────┴─────────────┴────────────┴──────────┴───────────┘
+
+⁵ gpuSize estimates minimum VRAM memory allocation. Older devices may require
+  additional memory for GPU compression formats.
+
+
+
+ ANIMATIONS
+ ────────────────────────────────────────────
+No animations found.
+
