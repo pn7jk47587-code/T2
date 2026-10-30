@@ -14,7 +14,8 @@ import { ICONS } from "../core/icons";
 import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
-import { useOverviewValues } from "../core/overview";
+import { cycleDay, useOverviewValues } from "../core/overview";
+import type { CycleLog, Reminder } from "../core/types";
 import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
 import type { Arms } from "../core/types";
 import { useSkin } from "../core/skins";
@@ -76,11 +77,32 @@ function runeTexture(id: string) {
   return t;
 }
 
-interface Api { select: (id: string | null, at?: THREE.Intersection) => void; open: () => void }
+interface Api { select: (id: string | null, at?: THREE.Intersection) => void; open: () => void; wall: (lines: string[]) => void }
+
+/** Zeilen als halbtransparente Code-Textur */
+function codeTexture(lines: string[]) {
+  const lh = 34, w = 1024;
+  const c = document.createElement("canvas"); c.width = w; c.height = Math.max(lh, lines.length * lh + 16);
+  const g = c.getContext("2d")!;
+  g.font = "600 26px ui-monospace, Menlo, Consolas, monospace";
+  g.textBaseline = "top";
+  lines.forEach((l, i) => {
+    const y = 8 + i * lh;
+    const m = l.match(/^(\s*)([^=:{}]+?)(\s*[=:]\s*)(.*)$/);
+    if (l.trim().startsWith("//")) { g.fillStyle = "rgba(150,156,163,.8)"; g.fillText(l, 12, y); return; }
+    if (!m) { g.fillStyle = "rgba(205,210,215,.9)"; g.fillText(l, 12, y); return; }
+    let x = 12;
+    g.fillStyle = "rgba(205,210,215,.92)"; g.fillText(m[1] + m[2], x, y); x += g.measureText(m[1] + m[2]).width;
+    g.fillStyle = "rgba(150,156,163,.8)"; g.fillText(m[3], x, y); x += g.measureText(m[3]).width;
+    g.fillStyle = m[4].startsWith("—") ? "rgba(120,126,133,.8)" : "rgba(214,58,82,.95)"; g.fillText(m[4], x, y);
+  });
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return { t, aspect: c.width / c.height };
+}
 
 export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) => void }) {
   const mount = useRef<HTMLDivElement>(null);
-  const api = useRef<Api>({ select: () => {}, open: () => {} });
+  const api = useRef<Api>({ select: () => {}, open: () => {}, wall: () => {} });
   const [sel, setSel] = useState<string | null>(null);
   const [diving, setDiving] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -88,6 +110,26 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const skin = useSkin();
   const ov = useOverviewValues();
   const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [rem] = useStored<Reminder[]>("erinnerungen", []);
+  const [cyc] = useStored<CycleLog>("zyklus", {});
+  const lines = (() => {
+    const today = new Date();
+    const out = [`// ${today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`, "tagesueberblick {"];
+    for (const m of overviewItems) out.push(`  ${m.label.toLowerCase().replace(/ /g, "_")}: ${ov[m.id] ?? "—"}`);
+    out.push("}");
+    const open = rem.filter((r) => !r.done);
+    out.push(`erinnerungen.offen = ${open.length}`, `erinnerungen.erledigt = ${rem.length - open.length}`);
+    for (const l of Array.from(new Set(rem.map((r) => r.category).filter(Boolean)))) out.push(`liste["${l}"] = ${open.filter((r) => r.category === l).length}`);
+    const cd = cycleDay(cyc);
+    out.push(`zyklus.tag = ${cd ?? "—"}`);
+    Object.keys(cyc).sort().slice(-7).forEach((d) => {
+      const e = cyc[d];
+      out.push(`zyklus["${d}"] = { ${[e.flow ? `blutung: ${e.flow}` : "", e.spotting ? `schmier: ${e.spotting}` : "", e.pain ? `schmerz: ${e.pain}` : ""].filter(Boolean).join(", ")} }`);
+    });
+    out.push(`wappen = { form: ${arms.shape}, teilung: ${arms.division}, symbol: ${arms.charge} }`);
+    return out;
+  })();
+  const linesKey = lines.join("\n");
   const goRef = useRef(go);
   goRef.current = go;
 
@@ -276,6 +318,29 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     renderer.domElement.addEventListener("pointerup", onUp);
 
     const tmp = new THREE.Vector3(), dir = new THREE.Vector3();
+    /* Analytics-Wand: schwebende Code-Zeilen vor der Rüstung, nur von hinten lesbar */
+    const wall = new THREE.Group(); scene.add(wall);
+    const strips: { m: THREE.Mesh; base: number; ph: number; y: number }[] = [];
+    const wallDir = new THREE.Vector3(0, 0, -1);
+    api.current.wall = (lines) => {
+      for (const st of strips) { wall.remove(st.m); st.m.geometry.dispose(); const mm = st.m.material as THREE.MeshBasicMaterial; mm.map?.dispose(); mm.dispose(); }
+      strips.length = 0;
+      const layout: [number, number, number, number, number][] = [
+        // x, y, z, Breite, Deckkraft
+        [-0.6, 1.5, 1.5, 1.7, 0.8], [0.95, 1.2, 1.8, 1.6, 0.65], [-1.55, 0.75, 2.3, 1.8, 0.5], [0.35, 0.55, 2.1, 1.7, 0.55],
+        [1.75, 0.6, 2.6, 1.6, 0.45], [-0.2, 2.2, 2.7, 2.1, 0.45], [1.6, 2.0, 3.0, 1.7, 0.4], [-1.9, 1.9, 3.1, 1.8, 0.4],
+        [-0.9, 0.25, 3.3, 2.0, 0.35], [1.0, 2.6, 3.5, 2.0, 0.3],
+      ];
+      layout.forEach(([x, y, z, wdt, op], k) => {
+        const part = [...lines.slice((k * 4) % lines.length), ...lines.slice(0, (k * 4) % lines.length)].slice(0, 9 + (k % 4) * 3);
+        const { t, aspect } = codeTexture(k === 0 ? lines : part);
+        const mat = new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0, depthWrite: false, toneMapped: false, side: THREE.FrontSide });
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, wdt / aspect), mat);
+        m.rotation.y = Math.PI; m.position.set(x, y, z); m.renderOrder = 2;
+        wall.add(m); strips.push({ m, base: op, ph: k * 1.7, y });
+      });
+    };
+
     let raf = 0;
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
@@ -293,12 +358,19 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       } else {
         outline.edgeStrength = 0;
       }
+      // Wand blendet sich nur ein, wenn die Kamera hinter der Rüstung steht
+      for (const st of strips) {
+        const toCam = tmp.copy(camera.position).sub(st.m.position).normalize();
+        const facing = wallDir.dot(toCam);
+        (st.m.material as THREE.MeshBasicMaterial).opacity = Math.max(0, Math.min(1, (facing - 0.25) * 2)) * st.base;
+        st.m.position.y = st.y + Math.sin(t / 2600 + st.ph) * 0.03;
+      }
       composer.render();
     };
     raf = requestAnimationFrame(loop);
 
     return () => {
-      disposed = true; clearRune();
+      disposed = true; clearRune(); api.current.wall([]);
       cancelAnimationFrame(raf); ro.disconnect();
       renderer.domElement.removeEventListener("pointerdown", onDown);
       renderer.domElement.removeEventListener("pointerup", onUp);
@@ -306,6 +378,8 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       el.removeChild(renderer.domElement);
     };
   }, []);
+
+  useEffect(() => { api.current.wall(linesKey.split("\n")); }, [linesKey]);
 
   const part = PARTS.find((p) => p.id === sel);
   const mod = part ? getModule(part.module) : undefined;
@@ -320,11 +394,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
             <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Einstellungen"><CoatOfArms arms={arms} /></button>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}
-          </div>
-          <div className="metrics rk-metrics">
-            {overviewItems.map((m) => (
-              <div className="metric" key={m.id}><b>{ov[m.id] ?? "–"}</b><small>{m.label}</small></div>
-            ))}
           </div>
         </div>
         {back && (
