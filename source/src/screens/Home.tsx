@@ -1,9 +1,11 @@
-import { useRef } from "react";
+import { lazy, Suspense, useRef } from "react";
 import { Icon } from "../components/Icon";
 import { modules } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Profile } from "../core/types";
 import { resizeImage } from "../core/image";
+
+const Schatzkammer = lazy(() => import("../components/Schatzkammer").then((m) => ({ default: m.Schatzkammer })));
 
 export const defaultProfile: Profile = { name: "Dein Name", mottos: [] };
 
@@ -78,6 +80,10 @@ export function Home({ go }: { go: (id: string) => void }) {
           ))}
         </div>
       </section>
+
+      <Suspense fallback={null}>
+        <Schatzkammer />
+      </Suspense>
 
       <nav className="grid" aria-label="Module">
         {modules.map((m) => (
