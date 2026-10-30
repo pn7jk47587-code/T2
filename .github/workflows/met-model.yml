@@ -1,0 +1,19 @@
+name: Met 3D-Modell suchen
+
+on:
+  workflow_dispatch:
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Objektseite laden und nach 3D-Dateien suchen
+        run: |
+          UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+          curl -sSL -A "$UA" -o page.html -w "HTTP %{http_code} %{size_download} bytes\n" https://www.metmuseum.org/art/collection/search/24671 || true
+          echo "--- Treffer glb/usdz/fbx/masters/3d ---"
+          grep -oiE '[^"'"'"' ]*(\.glb|\.usdz|\.fbx|masters[^"'"'"' ]*|3d[^"'"'"' ]{0,80})' page.html | sort -u | head -80 || true
+          echo "--- Treffer model/viewer ---"
+          grep -oiE '"[^"]*(model|viewer|three|gltf)[^"]{0,120}"' page.html | sort -u | head -60 || true
+          echo "--- Kopf ---"
+          head -c 1500 page.html
