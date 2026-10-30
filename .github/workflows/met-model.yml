@@ -1,4 +1,4 @@
-name: Met 3D-Modell suchen
+name: Met 3D-Modell laden
 
 on:
   workflow_dispatch:
@@ -7,32 +7,22 @@ permissions:
   contents: write
 
 jobs:
-  find:
+  fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Browser installieren
+      - name: Harnisch Heinrichs II. laden (Met, CC0)
         run: |
-          mkdir -p work && cd work && npm init -y >/dev/null && npm i playwright@1 @gltf-transform/cli@4 >/dev/null 2>&1
-          npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Seite öffnen und 3D-Dateien mitschneiden
-        working-directory: work
+          mkdir -p pub && cd pub
+          curl -sSfL -o henry2.glb "https://api.vntana.com/assets/products/7431e6e3-5a90-4e1d-b2e7-816c981e5cea/organizations/The-Metropolitan-Museum-of-Art/clients/masters/dc109b64-de74-4d88-afb4-a0d6176ec37a.glb"
+          ls -la henry2.glb > info.txt
+          npx -y @gltf-transform/cli@4 inspect henry2.glb >> info.txt 2>&1 || true
+      - name: In Zweig met-data ablegen
+        working-directory: pub
         run: |
-          mkdir -p out model
-          cp ../.github/met/find.mjs .
-          node find.mjs || echo "Skriptfehler $?" >> out/title.txt
-          ls -la model out >> out/title.txt
-          for f in model/*.glb; do [ -f "$f" ] && npx gltf-transform inspect "$f" > "out/inspect-$(basename $f).txt" 2>&1 || true; done
-      - name: Ergebnis in Zweig met-data ablegen
-        working-directory: work
-        run: |
-          mkdir pub && cp -r out pub/
-          find model -name "*.glb" -size -95M -exec cp {} pub/ \; || true
-          cd pub
           git init -q -b met-data
           git config user.name "github-actions"; git config user.email "actions@github.com"
-          git add -A; git commit -qm "Suchergebnis"
+          git add -A; git commit -qm "Harnisch Heinrichs II., Met 39.121a-n, CC0"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" met-data
