@@ -10,18 +10,28 @@ jobs:
   find:
     runs-on: ubuntu-latest
     steps:
-      - name: Objektseite laden und nach 3D-Dateien suchen
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Browser installieren
         run: |
-          mkdir -p out
-          UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
-          curl -sSL -A "$UA" -o out/page.html -w "HTTP %{http_code} %{size_download} bytes\n" https://www.metmuseum.org/art/collection/search/24671 > out/find.txt 2>&1 || true
-          echo "--- glb/usdz/fbx/masters ---" >> out/find.txt
-          grep -oiE '[^"'"'"' \\]*(\.glb|\.usdz|\.fbx|masters)[^"'"'"' \\]*' out/page.html | sort -u | head -80 >> out/find.txt || true
-          echo "--- 3d/model ---" >> out/find.txt
-          grep -oiE '.{0,120}(3d|model3d|threeD|gltf).{0,160}' out/page.html | head -40 >> out/find.txt || true
+          mkdir -p work && cd work && npm init -y >/dev/null && npm i playwright@1 @gltf-transform/cli@4 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Seite öffnen und 3D-Dateien mitschneiden
+        working-directory: work
+        run: |
+          mkdir -p out model
+          cp ../.github/met/find.mjs .
+          node find.mjs || echo "Skriptfehler $?" >> out/title.txt
+          ls -la model out >> out/title.txt
+          for f in model/*.glb; do [ -f "$f" ] && npx gltf-transform inspect "$f" > "out/inspect-$(basename $f).txt" 2>&1 || true; done
       - name: Ergebnis in Zweig met-data ablegen
+        working-directory: work
         run: |
-          cd out
+          mkdir pub && cp -r out pub/
+          find model -name "*.glb" -size -95M -exec cp {} pub/ \; || true
+          cd pub
           git init -q -b met-data
           git config user.name "github-actions"; git config user.email "actions@github.com"
           git add -A; git commit -qm "Suchergebnis"
