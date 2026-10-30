@@ -1,4 +1,4 @@
-# App Royal
+# App 
 
 Persönliche Organisations-App. Startseite mit Profilkopf, Tagesüberblick und Kacheln. Alle Daten bleiben lokal auf dem Gerät.
 
