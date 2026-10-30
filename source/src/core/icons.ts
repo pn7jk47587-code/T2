@@ -4,8 +4,8 @@
  * Raster 24 x 24, Linienstärke kommt vom Stil.
  */
 export const ICONS: Record<string, string[]> = {
-  // Mondsichel mit Stern (die Mondsichel ist auch das Zeichen Heinrichs II.)
-  zyklus: ["M14 3.5a8.5 8.5 0 1 0 0 17a7 7 0 0 1 0-17Z", "M18.5 9.5v5M16 12h5"],
+  // Kreislauf mit Blutstropfen
+  zyklus: ["M19.6 9.2A8.2 8.2 0 1 0 20.2 13.6", "M20.6 5.8l-.9 3.5-3.4-.9", "M12 7.6c2.1 2.6 3.3 4.4 3.3 6.1a3.3 3.3 0 0 1-6.6 0c0-1.7 1.2-3.5 3.3-6.1Z"],
   // Glocke
   erinnerungen: ["M12 3v2", "M7 16c0-6.2 1.6-10.5 5-10.5s5 4.3 5 10.5", "M4.5 16h15", "M12 16v2.2", "M10.8 19.4a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0Z"],
   // Strahlendes Herz

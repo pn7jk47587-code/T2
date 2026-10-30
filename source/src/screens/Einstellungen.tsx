@@ -49,6 +49,11 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
         <span className="chip">Entwurf</span>
       </button>
 
+      <button className="card row" style={{ width: "100%", textAlign: "left", marginTop: 8 }} onClick={() => nav("wappen")}>
+        <div className="t">Wappen</div>
+        <span className="chip">Gestalten</span>
+      </button>
+
       <div className="section eyebrow">Startseite</div>
       <div className="chips">
         {[["kacheln", "Kacheln"], ["ruestung", "Rüstung"]].map(([id, label]) => (

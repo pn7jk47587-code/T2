@@ -60,6 +60,9 @@ export interface Reminder {
   done: boolean;
   createdAt: number;
   doneAt?: number;
+  notes?: string;
+  url?: string;
+  urgent?: boolean;
 }
 
 /** Ein Tag im Zyklus. flow 1–4: leicht, mittel, stark, sehr stark. pain 1–4. */
@@ -69,3 +72,13 @@ export interface CycleDay {
   pain?: 1 | 2 | 3 | 4;
 }
 export type CycleLog = Record<string, CycleDay>;
+
+/** Eigenes Wappen */
+export interface Arms {
+  shape: string;
+  division: string;
+  c1: string;
+  c2: string;
+  charge: string;
+  cc: string;
+}

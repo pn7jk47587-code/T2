@@ -15,6 +15,8 @@ import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
 import { useOverviewValues } from "../core/overview";
+import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
+import type { Arms } from "../core/types";
 import { useSkin } from "../core/skins";
 import type { Profile } from "../core/types";
 
@@ -86,6 +88,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
   const skin = useSkin();
   const ov = useOverviewValues();
+  const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
   const goRef = useRef(go);
   goRef.current = go;
 
@@ -316,7 +319,10 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
-            <div className="avatar-ring"><div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span>{letter}</span>}</div></div>
+            <div className="avatar-wrap">
+              <div className="avatar-ring"><div className="avatar">{profile.photo ? <img src={profile.photo} alt="" /> : <span>{letter}</span>}</div></div>
+              <button className="arms-badge" style={{ pointerEvents: "auto" }} onClick={() => go("wappen")} aria-label="Wappen"><CoatOfArms arms={arms} /></button>
+            </div>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}
           </div>

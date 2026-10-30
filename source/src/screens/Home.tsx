@@ -8,6 +8,8 @@ import { resizeImage } from "../core/image";
 import { useSkin } from "../core/skins";
 import { getShield } from "../core/shields";
 import { useId } from "react";
+import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
+import type { Arms } from "../core/types";
 
 export const defaultProfile: Profile = { name: "Dein Name", mottos: [] };
 
@@ -29,6 +31,7 @@ export function Home({ go }: { go: (id: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const skin = useSkin();
   const ov = useOverviewValues();
+  const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
   const gid = useId().replace(/:/g, "");
   const shield = skin.shield ? getShield(skin.shield) : null;
 
@@ -44,11 +47,14 @@ export function Home({ go }: { go: (id: string) => void }) {
   return (
     <>
       <header className="profile">
-        <button className="avatar-ring" onClick={() => fileRef.current?.click()} aria-label="Profilbild ändern">
-          <div className="avatar">
-            {profile.photo ? <img src={profile.photo} alt="" /> : <span>{(profile.name.trim()[0] || "?").toUpperCase()}</span>}
-          </div>
-        </button>
+        <div className="avatar-wrap">
+          <button className="avatar-ring" onClick={() => fileRef.current?.click()} aria-label="Profilbild ändern">
+            <div className="avatar">
+              {profile.photo ? <img src={profile.photo} alt="" /> : <span>{(profile.name.trim()[0] || "?").toUpperCase()}</span>}
+            </div>
+          </button>
+          <button className="arms-badge" onClick={() => go("wappen")} aria-label="Wappen"><CoatOfArms arms={arms} /></button>
+        </div>
         <input
           ref={fileRef}
           type="file"
