@@ -9,10 +9,12 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry.js";
+import { ICONS } from "../core/icons";
 import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
-import { getSkin, SkinCtx } from "../core/skins";
+import { useSkin } from "../core/skins";
 import type { Profile } from "../core/types";
 
 /**
@@ -21,6 +23,12 @@ import type { Profile } from "../core/types";
  * Das Modell (public/armor.glb) ist in neun Teile zerlegt, jedes Teil ist ein Modul.
  */
 interface PartDef { id: string; name: string; module: string }
+
+/** Ankerpunkte der Runen (Meter, Boden y=0). Bei Paaren wird die Seite gewählt, die zur Kamera zeigt. */
+const ANCHORS: Record<string, [number, number, number, boolean]> = {
+  helm: [0, 1.74, 0, false], brust: [0.08, 1.3, 0, false], ruecken: [0.08, 1.3, 0, false], fauld: [-0.12, 0.8, 0, false],
+  schulter: [0.25, 1.42, 0, true], arm: [0.27, 1.12, 0, true], hand: [0.27, 0.9, 0, true], bein: [0.11, 0.42, 0, true], schuh: [0.12, 0.07, 0.08, true],
+};
 
 const PARTS: PartDef[] = [
   { id: "helm", name: "Geschlossener Helm", module: "gefuehle" },
@@ -48,7 +56,25 @@ function radialTexture() {
   return new THREE.CanvasTexture(c);
 }
 
-interface Api { select: (id: string | null) => void; open: () => void }
+/** Symbol als rot leuchtende Rune auf transparentem Grund. */
+function runeTexture(id: string) {
+  const c = document.createElement("canvas"); c.width = c.height = 512;
+  const g = c.getContext("2d")!;
+  g.lineCap = "round"; g.lineJoin = "round";
+  const draw = (w: number, col: string, blur: number) => {
+    g.save(); g.translate(64, 64); g.scale(384 / 24, 384 / 24);
+    g.shadowColor = "#ff1030"; g.shadowBlur = blur; g.strokeStyle = col; g.lineWidth = w;
+    for (const d of ICONS[id] ?? []) g.stroke(new Path2D(d));
+    g.restore();
+  };
+  draw(2.6, "rgba(200,10,40,.55)", 40);
+  draw(1.5, "#ff3048", 18);
+  draw(0.7, "#ffd0d6", 4);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+interface Api { select: (id: string | null, at?: THREE.Intersection) => void; open: () => void }
 
 export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) => void }) {
   const mount = useRef<HTMLDivElement>(null);
@@ -57,6 +83,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const [diving, setDiving] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
+  const skin = useSkin();
   const goRef = useRef(go);
   goRef.current = go;
 
@@ -140,7 +167,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     const composer = new EffectComposer(renderer, target);
     composer.addPass(new RenderPass(scene, camera));
     const outline = new OutlinePass(new THREE.Vector2(w0, h0), scene, camera);
-    outline.visibleEdgeColor.set(0xffe2a0); outline.hiddenEdgeColor.set(0x6a5a38);
+    outline.visibleEdgeColor.set(0xe9edf0); outline.hiddenEdgeColor.set(0x4a4e53);
     outline.edgeGlow = 1.4; outline.edgeThickness = 2.2; outline.edgeStrength = 0; outline.pulsePeriod = 0;
     composer.addPass(outline);
     composer.addPass(new OutputPass());
@@ -170,9 +197,48 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       for (const m of byPart.get(id) ?? []) box.expandByObject(m);
       return { c: box.getCenter(new THREE.Vector3()), s: box.getSize(new THREE.Vector3()) };
     }
-    api.current.select = (id) => {
+    /* Rune: das Symbol des Moduls wird auf die Oberfläche des Teils projiziert */
+    let rune: THREE.Group | null = null;
+    const runeMat = () => (rune?.children[0] as THREE.Mesh | undefined)?.material as THREE.MeshBasicMaterial | undefined;
+    const helper = new THREE.Object3D();
+    function clearRune() {
+      if (!rune) return;
+      scene.remove(rune);
+      const mm = runeMat(); mm?.map?.dispose(); mm?.dispose();
+      for (const c of rune.children) (c as THREE.Mesh).geometry.dispose();
+      rune = null;
+    }
+    function placeRune(id: string, at?: THREE.Intersection) {
+      clearRune();
+      const meshes = byPart.get(id) ?? [];
+      const { s } = centerOf(id);
+      const [ax, ay, az, pair] = ANCHORS[id] ?? [0, 1, 0, false];
+      const x = pair ? Math.sign(camera.position.x || 1) * Math.abs(ax) : ax;
+      const anchor = new THREE.Vector3(x, ay, az);
+      const r2 = new THREE.Raycaster(camera.position.clone(), anchor.clone().sub(camera.position).normalize());
+      const hit = r2.intersectObjects(meshes, false)[0] ?? at;
+      if (!hit || !hit.face) return;
+      const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+      if (n.dot(camera.position.clone().sub(hit.point)) < 0) n.negate();
+      // Projektion leicht zur Kamera geneigt, damit die Rune auf gewölbten Platten lesbar bleibt
+      const view = camera.position.clone().sub(hit.point).normalize();
+      n.lerp(view, 0.35).normalize();
+      helper.position.copy(hit.point); helper.lookAt(hit.point.clone().add(n));
+      const size = Math.min(0.16, Math.max(0.07, Math.max(s.x, s.y) * 0.26));
+      const mod = PARTS.find((p) => p.id === id)!.module;
+      const mat = new THREE.MeshBasicMaterial({ map: runeTexture(mod), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, blending: THREE.AdditiveBlending, toneMapped: false });
+      const group = new THREE.Group();
+      for (const m of meshes) {
+        const geo = new DecalGeometry(m, hit.point, helper.rotation, new THREE.Vector3(size, size, size * 1.6));
+        if (geo.attributes.position.count) { const dm = new THREE.Mesh(geo, mat); dm.renderOrder = 5; group.add(dm); } else geo.dispose();
+      }
+      rune = group; scene.add(group);
+    }
+
+    api.current.select = (id, at) => {
       if (busy) return;
       selected = id; setSel(id); selT = performance.now(); hint = null;
+      clearRune(); if (id) placeRune(id, at);
       controls.autoRotate = false;
       if (!id) { outline.selectedObjects = []; focus = { c: home.clone(), d: 5.6, speed: 0.07 }; return; }
       outline.selectedObjects = byPart.get(id) ?? [];
@@ -202,7 +268,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
       const hit = ray.intersectObjects(pickables, false)[0];
       const id = hit ? (hit.object.userData.part as string) : null;
-      if (id && id === selected) api.current.open(); else api.current.select(id);
+      if (id && id === selected) api.current.open(); else api.current.select(id, hit);
     };
     renderer.domElement.addEventListener("pointerdown", onDown);
     renderer.domElement.addEventListener("pointerup", onUp);
@@ -221,6 +287,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         const dt = t - selT;
         outline.edgeStrength = 3.2 + 7 * Math.exp(-dt / 280) + 0.5 * Math.sin(t / 420);
         outline.edgeGlow = 1.2 + 1.6 * Math.exp(-dt / 350);
+        const rm = runeMat(); if (rm) rm.opacity = Math.min(1, dt / 180) * (0.75 + 0.25 * Math.sin(t / 380));
       } else if (hint) {
         const p = (t - hint.t) / 1500;
         if (p >= 1) { hint = null; outline.selectedObjects = []; outline.edgeStrength = 0; }
@@ -234,7 +301,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     raf = requestAnimationFrame(loop);
 
     return () => {
-      disposed = true;
+      disposed = true; clearRune();
       cancelAnimationFrame(raf); ro.disconnect();
       renderer.domElement.removeEventListener("pointerdown", onDown);
       renderer.domElement.removeEventListener("pointerup", onUp);
@@ -249,8 +316,8 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const motto = profile.mottos.find((m) => m.trim());
 
   return (
-    <SkinCtx.Provider value={getSkin("ritter-2")}>
-      <div className="rk" data-skin="metall-1">
+    <>
+      <div className="rk" data-skin={skin.id}>
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
@@ -282,6 +349,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         )}
         <div className={"rk-fade" + (diving ? " on" : "")} />
       </div>
-    </SkinCtx.Provider>
+    </>
   );
 }

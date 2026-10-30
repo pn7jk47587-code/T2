@@ -1,12 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { installShapes } from "./core/shapes";
+import { installShields } from "./core/shapes";
+import "./fonts.css";
 import "./styles/theme.css";
 import "./styles/app.css";
 import "./styles/skins.css";
 
-installShapes();
+installShields();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

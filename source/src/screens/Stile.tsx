@@ -36,13 +36,6 @@ function Preview({ skin }: { skin: Skin }) {
 
 export function Stile({ back, current, choose }: { back: () => void; current: string; choose: (id: string) => void }) {
   const scroller = useRef<HTMLDivElement>(null);
-  const groups = Array.from(new Set(skins.map((s) => s.group)));
-
-  function jump(group: string) {
-    const idx = skins.findIndex((s) => s.group === group);
-    const el = scroller.current?.children[idx] as HTMLElement | undefined;
-    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }
 
   return (
     <>
@@ -52,19 +45,11 @@ export function Stile({ back, current, choose }: { back: () => void; current: st
         </button>
         <h1>Stile</h1>
       </div>
-      <div className="chips" style={{ marginBottom: 14 }}>
-        {groups.map((g) => (
-          <button key={g} className="chip" onClick={() => jump(g)}>
-            {g}
-          </button>
-        ))}
-      </div>
       <div className="carousel" ref={scroller}>
         {skins.map((s) => (
           <div className="slide" key={s.id}>
             <div className="slide-head">
               <div>
-                <div className="eyebrow">{s.group}</div>
                 <div className="slide-name">{s.name}</div>
               </div>
               <button className={"btn small" + (current === s.id ? " ghost" : "")} onClick={() => choose(s.id)}>

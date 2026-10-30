@@ -4,7 +4,9 @@ import { Stile } from "./screens/Stile";
 import { screenFor } from "./screens";
 import { getModule } from "./core/modules";
 import { useStored } from "./core/db";
-import { Backdrop, MoonButton, Particles } from "./components/Scenery";
+import { Backdrop, Particles } from "./components/Scenery";
+import { applyFont } from "./core/fonts";
+import { Entwurf } from "./screens/Entwurf";
 import { getSkin, NavCtx, SkinCtx } from "./core/skins";
 
 const Ruestkammer = lazy(() => import("./screens/Ruestkammer").then((m) => ({ default: m.Ruestkammer })));
@@ -41,13 +43,15 @@ function useRoute() {
 
 export default function App() {
   const [id, go] = useRoute();
-  const [skinId, setSkinId] = useStored<string>("skin", "mond-1");
+  const [skinId, setSkinId] = useStored<string>("skin", "glanz");
+  const [fontId, setFontId] = useStored<string>("font", "pirata");
   const [homeMode] = useStored<string>("homeMode", "kacheln");
   const skin = getSkin(skinId);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-skin", skin.id);
   }, [skin.id]);
+  useEffect(() => applyFont(fontId), [fontId]);
 
   const mod = id ? getModule(id) : undefined;
   const Screen = mod ? screenFor(mod.id) : null;
@@ -63,9 +67,10 @@ export default function App() {
           <>
         <Backdrop skinId={skin.id} />
         <Particles mode={skin.particles} skinId={skin.id} />
-        {skin.moon && id !== "stile" && <MoonButton />}
         <div className="app">
-          {id === "stile" ? (
+          {id === "entwurf" ? (
+            <Entwurf back={() => go("einstellungen")} font={fontId} chooseFont={setFontId} />
+          ) : id === "stile" ? (
             <Stile back={() => go("einstellungen")} current={skin.id} choose={setSkinId} />
           ) : mod && Screen ? (
             <Screen mod={mod} back={() => go("")} />

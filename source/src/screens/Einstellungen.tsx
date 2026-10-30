@@ -40,9 +40,13 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
       <button className="card row" style={{ width: "100%", textAlign: "left" }} onClick={() => nav("stile")}>
         <div>
           <div className="t">{getSkin(skin.id).name}</div>
-          <div className="s">{skin.group}</div>
         </div>
         <span className="chip">Ändern</span>
+      </button>
+
+      <button className="card row" style={{ width: "100%", textAlign: "left", marginTop: 8 }} onClick={() => nav("entwurf")}>
+        <div className="t">Schrift, Wappen, Symbole</div>
+        <span className="chip">Entwurf</span>
       </button>
 
       <div className="section eyebrow">Startseite</div>

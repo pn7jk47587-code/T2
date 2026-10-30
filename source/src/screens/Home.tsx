@@ -4,6 +4,9 @@ import { modules } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Profile } from "../core/types";
 import { resizeImage } from "../core/image";
+import { useSkin } from "../core/skins";
+import { getShield } from "../core/shields";
+import { useId } from "react";
 
 export const defaultProfile: Profile = { name: "Dein Name", mottos: [] };
 
@@ -23,6 +26,9 @@ export function Home({ go }: { go: (id: string) => void }) {
   const [profile, setProfile] = useStored<Profile>("profile", defaultProfile);
   const [mottoIdx, setMottoIdx] = useStored<number>("mottoIdx", 0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const skin = useSkin();
+  const gid = useId().replace(/:/g, "");
+  const shield = skin.shield ? getShield(skin.shield) : null;
 
   const mottos = profile.mottos.filter((m) => m.trim());
   const motto = mottos.length ? mottos[mottoIdx % mottos.length] : "";
@@ -83,12 +89,26 @@ export function Home({ go }: { go: (id: string) => void }) {
         {modules.map((m) => (
           <button
             key={m.id}
-            className="tile"
+            className={"tile" + (shield ? " shielded" : "")}
             aria-label={m.title}
             title={m.title}
             style={{ "--a": m.a, "--b": m.b } as React.CSSProperties}
             onClick={() => go(m.id)}
           >
+            {shield && (
+              <svg className="tile-shield" viewBox="0 0 100 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <defs>
+                  <linearGradient id={gid + m.id} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" style={{ stopColor: "var(--shield-a)" }} />
+                    <stop offset=".45" style={{ stopColor: "var(--shield-b)" }} />
+                    <stop offset=".6" style={{ stopColor: "var(--shield-c)" }} />
+                    <stop offset="1" style={{ stopColor: "var(--shield-b)" }} />
+                  </linearGradient>
+                </defs>
+                <path d={shield.d} fill={`url(#${gid + m.id})`} stroke="var(--shield-stroke)" strokeWidth="1.5" />
+                <path d={shield.d} fill="none" stroke="rgba(0,0,0,.25)" strokeWidth="1" transform="translate(50 60) scale(.9) translate(-50 -60)" />
+              </svg>
+            )}
             <Icon name={m.icon} />
           </button>
         ))}

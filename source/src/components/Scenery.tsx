@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { triggerEgg } from "../core/eggs";
 import type { ParticleMode } from "../core/skins";
 
 /** Hintergrundebenen. Aussehen und Silhouetten legt skins.css pro Stil fest. */
@@ -68,12 +67,8 @@ export function Particles({ mode, skinId }: { mode: ParticleMode; skinId: string
         parts.push({ x: Math.random() * w, y: Math.random() * h, r: 1, ph: Math.random() * 6.28, sp: 1, vx: 0, vy: 1.6 + Math.random() * 3.4, life: 1, kind: "streak", len: 18 + Math.random() * 50, hue: Math.random() });
     };
 
-    if (mode === "glitter") { glit(46); fly(7); }
-    if (mode === "stars") glit(110, 1.2);
-    if (mode === "fireflies") { fly(15); glit(30, 1.2); }
-    if (mode === "dust") glit(34, 2.2);
-    if (mode === "embers") embers(38);
-    if (mode === "rain") streaks(34);
+    if (mode === "embers") { embers(38); fly(0); streaks(0); }
+    if (mode === "sparks") glit(26, 1.1);
 
     const onBurst = (e: Event) => {
       const d = (e as CustomEvent).detail ?? {};
@@ -87,7 +82,7 @@ export function Particles({ mode, skinId }: { mode: ParticleMode; skinId: string
 
     function draw(t: number) {
       ctx.clearRect(0, 0, w, h);
-      if (mode === "stars" && !reduced && t > nextShoot) {
+      if (false && !reduced && t > nextShoot) {
         nextShoot = t + 6000 + Math.random() * 6000;
         parts.push({ x: Math.random() * w * 0.7, y: Math.random() * h * 0.3, r: 1.4, ph: 0, sp: 1, vx: 5 + Math.random() * 3, vy: 2 + Math.random() * 2, life: 1, kind: "shoot" });
       }
@@ -138,7 +133,7 @@ export function Particles({ mode, skinId }: { mode: ParticleMode; skinId: string
           ctx.strokeStyle = g; ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y - (p.len ?? 20)); ctx.stroke();
         } else {
-          const soft = mode === "dust";
+          const soft = false;
           const a = soft ? 0.08 + 0.22 * Math.max(0, Math.sin(t / 2600 * p.sp + p.ph)) : 0.12 + 0.88 * Math.pow(Math.max(0, Math.sin((t / 900) * p.sp + p.ph)), 3);
           if (soft && !reduced) { p.x += Math.sin(t / 3000 + p.ph) * 0.12; p.y += Math.cos(t / 3600 + p.ph) * 0.08; }
           ctx.fillStyle = `rgba(${c1},${a})`;
@@ -165,19 +160,4 @@ export function Particles({ mode, skinId }: { mode: ParticleMode; skinId: string
   }, [mode, skinId]);
 
   return <canvas ref={canvas} className="glitter" aria-hidden="true" />;
-}
-
-export function MoonButton() {
-  const tapCount = useRef(0);
-  const tapTimer = useRef<number>();
-  function tap() {
-    tapCount.current += 1;
-    window.clearTimeout(tapTimer.current);
-    tapTimer.current = window.setTimeout(() => (tapCount.current = 0), 1800);
-    if (tapCount.current >= 5) {
-      tapCount.current = 0;
-      void triggerEgg("mond");
-    }
-  }
-  return <button className="moon" onClick={tap} aria-label="Mond" />;
 }
