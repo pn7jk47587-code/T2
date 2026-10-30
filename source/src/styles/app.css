@@ -174,3 +174,4 @@ input, textarea { font: inherit; color: inherit; }
 .rk-fade { position: absolute; inset: 0; background: #07080a; opacity: 0; pointer-events: none; transition: opacity .5s ease .12s; z-index: 5; }
 .rk-fade.on { opacity: 1; }
 .rk-top { transition: opacity .3s; } .rk-top.hide { opacity: 0; }
+.rk-canvas { opacity: 0; transition: opacity 1.2s ease; } .rk-canvas.ready { opacity: 1; }
