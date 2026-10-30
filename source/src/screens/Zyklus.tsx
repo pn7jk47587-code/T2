@@ -3,6 +3,7 @@ import { Shell } from "../components/Shell";
 import { Icon } from "../components/Icon";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
+import { FloImport } from "../components/FloImport";
 import type { CycleDay, CycleLog } from "../core/types";
 import { iso, todayISO } from "../core/overview";
 
@@ -109,6 +110,7 @@ export function Zyklus({ mod, back }: { mod: ModuleDef; back: () => void }) {
           })}
         </div>
       </div>
+      <FloImport log={log} setLog={setLog} />
     </Shell>
   );
 }
