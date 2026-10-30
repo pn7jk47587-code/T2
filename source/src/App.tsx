@@ -8,6 +8,7 @@ import { Backdrop, Particles } from "./components/Scenery";
 import { applyFont } from "./core/fonts";
 import { Entwurf } from "./screens/Entwurf";
 import { Wappen } from "./screens/Wappen";
+import { Kacheln } from "./screens/Kacheln";
 import { getSkin, NavCtx, SkinCtx } from "./core/skins";
 
 const Ruestkammer = lazy(() => import("./screens/Ruestkammer").then((m) => ({ default: m.Ruestkammer })));
@@ -68,7 +69,9 @@ export default function App() {
         <Backdrop skinId={skin.id} />
         <Particles mode={skin.particles} skinId={skin.id} />
         <div className="app">
-          {id === "wappen" ? (
+          {id === "kacheln" ? (
+            <Kacheln back={() => go("einstellungen")} />
+          ) : id === "wappen" ? (
             <Wappen back={() => go("einstellungen")} />
           ) : id === "entwurf" ? (
             <Entwurf back={() => go("einstellungen")} />

@@ -342,3 +342,21 @@ input, textarea { font: inherit; color: inherit; }
 .wp-grid .wp-opt small { font-size: 11.5px; color: var(--text-dim); text-align: center; line-height: 1.2; }
 .wp-sws { display: flex; flex-wrap: wrap; gap: 10px; }
 .wp-nav { display: flex; justify-content: space-between; margin-top: 18px; }
+
+/* ---------- Kachelrahmen ---------- */
+.grid[data-tiles]:not([data-tiles="stil"]) { gap: 18px 14px; padding: 4px 6px; }
+.grid[data-tiles]:not([data-tiles="stil"]) .tile { background: none; border: none; box-shadow: none; color: #dde1e5; overflow: visible; }
+.grid[data-tiles]:not([data-tiles="stil"]) .tile::after { display: none; }
+.grid[data-tiles]:not([data-tiles="stil"]) .tile svg:not(.tile-frame) { width: 38%; height: 38%; filter: drop-shadow(0 0 6px rgba(255,255,255,.12)); --icon-sw: 1.35; }
+.tile svg.tile-frame { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: 1; color: rgba(214,219,224,.72); filter: none; }
+.tile-frame .tf-acc { fill: #b3243b; }
+.tile-frame .tf-rivet { fill: #c9ced3; }
+.grid[data-tiles="siegel"] .tile { border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.05), transparent 70%); }
+.grid[data-tiles="spitzbogen"] .tile svg:not(.tile-frame) { margin-top: 10%; }
+.grid[data-tiles="schild"] .tile svg:not(.tile-frame) { margin-top: -6%; width: 34%; height: 34%; }
+.grid[data-tiles="raute"] .tile svg:not(.tile-frame) { width: 32%; height: 32%; }
+.grid[data-tiles] .tile:active { transform: scale(.94); filter: drop-shadow(0 0 8px rgba(179,36,59,.6)); }
+.kc-card { display: block; width: 100%; padding: 12px 14px 16px; text-align: left; }
+.kc-card.on { border-color: var(--burgund-hell); box-shadow: inset 0 0 0 1px var(--burgund-hell); }
+.kc-name { font-family: var(--font-display); font-size: 22px; margin-bottom: 10px; }
+.kc-card .grid { pointer-events: none; }

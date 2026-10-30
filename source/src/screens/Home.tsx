@@ -7,6 +7,7 @@ import { useSkin } from "../core/skins";
 import { getShield } from "../core/shields";
 import { useId } from "react";
 import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
+import { TileFrame } from "../components/TileFrame";
 import type { Arms } from "../core/types";
 
 export const defaultProfile: Profile = { name: "Dein Name", mottos: [] };
@@ -29,8 +30,9 @@ export function Home({ go }: { go: (id: string) => void }) {
   const skin = useSkin();
   const ov = useOverviewValues();
   const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [tileStyle] = useStored<string>("tileStyle", "siegel");
   const gid = useId().replace(/:/g, "");
-  const shield = skin.shield ? getShield(skin.shield) : null;
+  const shield = skin.shield && tileStyle === "stil" ? getShield(skin.shield) : null;
 
   const mottos = profile.mottos.filter((m) => m.trim());
   const motto = mottos.length ? mottos[mottoIdx % mottos.length] : "";
@@ -72,7 +74,7 @@ export function Home({ go }: { go: (id: string) => void }) {
         </div>
       </section>
 
-      <nav className="grid" aria-label="Module">
+      <nav className="grid" aria-label="Module" data-tiles={tileStyle}>
         {modules.filter((m) => m.id !== "einstellungen").map((m) => (
           <button
             key={m.id}
@@ -96,6 +98,7 @@ export function Home({ go }: { go: (id: string) => void }) {
                 <path d={shield.d} fill="none" stroke="rgba(0,0,0,.25)" strokeWidth="1" transform="translate(50 60) scale(.9) translate(-50 -60)" />
               </svg>
             )}
+            <TileFrame style={tileStyle} />
             <Icon name={m.icon} />
           </button>
         ))}

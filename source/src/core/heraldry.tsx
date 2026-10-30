@@ -83,9 +83,11 @@ const wheat = () => {
   return d + "M12 1.2c.9 1 1.1 2.2.6 3.2h-1.2c-.5-1-.3-2.2.6-3.2Z";
 };
 
-export const CHARGES: { id: string; name: string; d: string }[] = [
+/** split: jedes Teilstück einzeln füllen, damit sich überlappende Formen nicht gegenseitig ausstanzen */
+export const CHARGES: { id: string; name: string; d: string; split?: boolean }[] = [
   { id: "keins", name: "Ohne", d: "" },
   { id: "lilie", name: "Lilie", d: "M12 1.8c-1.7 2.1-2.5 4-2.5 5.8 0 1.6.9 3 2.5 4.4 1.6-1.4 2.5-2.8 2.5-4.4 0-1.8-.8-3.7-2.5-5.8Z M10.8 12.8C9.5 10.6 7.2 9.5 4.6 10.1c-.5 2.8 1.4 5 4.2 5h1.4v1.3H7.2v1.8h3c-.4 1.6-1.3 2.8-2.7 3.6h9c-1.4-.8-2.3-2-2.7-3.6h3v-1.8h-3v-1.3h1.4c2.8 0 4.7-2.2 4.2-5-2.6-.6-4.9.5-6.2 2.7Z" },
+  { id: "schwertlilie", name: "Schwertlilie", split: true, d: "M11.3 21.5 3.4 6.2l1.5.5 7.8 13.6Z M12.7 21.5l7.9-15.3-1.5.5-7.8 13.6Z M12 1.5c-1.9 2.4-2.8 4.6-2.8 6.6 0 1.7.9 3.2 2.8 4.6 1.9-1.4 2.8-2.9 2.8-4.6 0-2-.9-4.2-2.8-6.6Z M10.6 12.6C9.8 9.2 6.6 7.6 3.4 8.6c-.3 1.7.5 3.3 2 4.2-1.2.2-2.1-.1-2.8-.7.2 2.4 2.4 3.6 4.8 3.3 1.4-.2 2.6-1.2 3.2-2.8Z M13.4 12.6c.8-3.4 4-5 7.2-4 .3 1.7-.5 3.3-2 4.2 1.2.2 2.1-.1 2.8-.7-.2 2.4-2.4 3.6-4.8 3.3-1.4-.2-2.6-1.2-3.2-2.8Z M7.6 13.2h8.8v2.1H7.6Z M10.7 15.3h2.6v1.5L12 21.6l-1.3-4.8Z" },
   { id: "mondsichel", name: "Mondsichel", d: "M14 3a9 9 0 1 0 0 18a7.4 7.4 0 0 1 0-18Z" },
   { id: "stern", name: "Stern", d: "M12 2.2l2.6 6 6.5.6-4.9 4.3 1.5 6.4L12 16.1l-5.7 3.4 1.5-6.4-4.9-4.3 6.5-.6Z" },
   { id: "sonne", name: "Sonne", d: sun() },
@@ -125,7 +127,11 @@ export function CoatOfArms({ arms, className, style }: { arms: Arms; className?:
       <g clipPath={`url(#${id}c)`}>
         <rect x="0" y="0" width="100" height="120" fill={tincture(arms.c1)} />
         {div.draw(tincture(arms.c2), sh.d)}
-        {ch?.d && <path d={ch.d} fill={tincture(arms.cc)} fillRule="evenodd" transform="translate(23 30) scale(2.25)" />}
+        {ch?.d && (
+          <g fill={tincture(arms.cc)} transform="translate(23 30) scale(2.25)">
+            {ch.split ? ch.d.split(/(?=M)/).map((d, i) => <path key={i} d={d} />) : <path d={ch.d} fillRule="evenodd" />}
+          </g>
+        )}
         <rect x="0" y="0" width="100" height="120" fill={`url(#${id}g)`} />
       </g>
       <path d={sh.d} fill="none" stroke={tincture(arms.bc ?? "silber")} strokeWidth="3" />
