@@ -61,3 +61,11 @@ export interface Reminder {
   createdAt: number;
   doneAt?: number;
 }
+
+/** Ein Tag im Zyklus. flow 1–4: leicht, mittel, stark, sehr stark. pain 1–4. */
+export interface CycleDay {
+  flow?: 1 | 2 | 3 | 4;
+  spotting?: "rot" | "braun";
+  pain?: 1 | 2 | 3 | 4;
+}
+export type CycleLog = Record<string, CycleDay>;

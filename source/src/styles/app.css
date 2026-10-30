@@ -221,3 +221,37 @@ select.input { appearance: none; -webkit-appearance: none; }
 .er-cat { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: 11.5px; }
 .er-late { color: #e0506a; }
 .er-done-toggle { display: block; width: 100%; text-align: left; }
+
+/* ---------- Zyklus ---------- */
+.zy-cal { padding: 10px 10px 12px; }
+.zy-head { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-display); font-size: 20px; padding: 0 2px 6px; }
+.zy-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.zy-wd { text-align: center; font-size: 11px; color: var(--text-faint); padding: 2px 0 4px; }
+.zy-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font-size: 13px; color: var(--text-dim); background: rgba(255,255,255,.03); border: 1px solid transparent; position: relative; }
+.zy-day[data-flow] { background: rgba(179,36,59, var(--f)); color: #fff; }
+.zy-day.today { border-color: rgba(255,255,255,.35); }
+.zy-day.sel { border-color: var(--silber); box-shadow: 0 0 0 1px var(--silber); }
+.zy-day.future { opacity: .35; }
+.zy-marks { display: flex; gap: 2px; height: 9px; align-items: center; }
+.zy-marks svg { width: 9px; height: 9px; color: var(--silber); }
+.zy-dot { width: 6px; height: 6px; border-radius: 50%; display: block; }
+.zy-dot.rot { background: #d0384f; } .zy-dot.braun { background: #8a5a3c; }
+.zy-block { padding: 14px; }
+.zy-label { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint); margin: 4px 2px 8px; }
+.zy-label:not(:first-child) { margin-top: 18px; }
+.zy-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.zy-opts.two { grid-template-columns: repeat(2, 1fr); }
+.zy-opt { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 10px;
+  background: rgba(255,255,255,.035); border: 1px solid var(--line); color: var(--text-dim); }
+.zy-opt small { font-size: 11.5px; }
+.zy-opt.on { border-color: #d0384f; background: rgba(179,36,59,.16); color: var(--text); box-shadow: 0 0 14px rgba(179,36,59,.3); }
+.zy-many { display: flex; gap: 1px; height: 22px; align-items: center; }
+.zy-many svg { width: 16px; height: 16px; }
+.zy-many.blut svg { fill: #c62a42; stroke: #e05068; }
+.zy-many.klein svg { width: 13px; height: 13px; }
+.zy-many.rot svg { fill: #d0384f; stroke: #e86a7e; }
+.zy-many.braun svg { fill: #8a5a3c; stroke: #a8775a; }
+.zy-many.schwerter { --icon-sw: 2.1; gap: 0; }
+.zy-many.schwerter svg { width: 16px; height: 22px; color: var(--silber); }
+.zy-opt.on .zy-many.schwerter svg { color: #fff; filter: drop-shadow(0 0 4px rgba(224,38,63,.7)); }
