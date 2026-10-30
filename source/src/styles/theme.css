@@ -1,0 +1,7 @@
+/* Grundwerte, die in allen Stilen gleich sind. Farben und Schrift stehen in skins.css. */
+:root {
+  --radius: 22px;
+  --radius-s: 14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}

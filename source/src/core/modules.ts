@@ -17,94 +17,80 @@ export interface ModuleDef {
   b: string;
   /** Werte, die dieses Modul zum Tagesüberblick und zur Tageskarte beisteuert */
   feeds: Feed[];
-  /** Fragen, die ich für die Ausarbeitung von dir brauche */
-  open: string[];
 }
 
 export const modules: ModuleDef[] = [
   {
     id: "zyklus",
     title: "Zyklus",
-    icon: "moon",
+    icon: "zyklus",
     a: "var(--clay)",
     b: "var(--sand)",
     feeds: [{ id: "cycleDay", label: "Zyklustag" }],
-    open: ["Welche Angaben willst du pro Tag erfassen?", "Soll die App Prognosen berechnen?"],
   },
   {
     id: "erinnerungen",
     title: "Erinnerungen",
-    icon: "hourglass",
+    icon: "erinnerungen",
     a: "var(--sand)",
     b: "var(--clay)",
     feeds: [{ id: "dueToday", label: "Heute fällig" }],
-    open: [
-      "Was fehlt dir bei Apple Erinnerungen konkret?",
-      "Echte Push-Benachrichtigungen setzen später die native iOS-Hülle voraus.",
-    ],
   },
   {
     id: "gefuehle",
     title: "Gefühle",
-    icon: "potion",
+    icon: "gefuehle",
     a: "var(--teal)",
     b: "var(--green)",
     feeds: [{ id: "mood", label: "Stimmung" }],
-    open: ["Welche Gefühlsachsen und Begriffe willst du nutzen?", "Mehrmals täglich oder einmal am Abend?"],
   },
   {
     id: "gewohnheiten",
     title: "Gewohnheiten",
-    icon: "sprout",
+    icon: "gewohnheiten",
     a: "var(--green)",
     b: "var(--moss)",
     feeds: [{ id: "habits", label: "Gewohnheiten" }],
-    open: ["Tägliche, wöchentliche oder freie Rhythmen?", "Mit Serien (Streaks) oder ohne?"],
   },
   {
     id: "finanzen",
     title: "Finanzen",
-    icon: "pouch",
+    icon: "finanzen",
     a: "var(--moss)",
     b: "var(--teal)",
     feeds: [{ id: "spent", label: "Ausgaben" }],
-    open: ["Manuelle Eingabe oder Import von Kontoumsätzen (CSV)?", "Kategorien und Budgets?"],
   },
   {
     id: "fundorte",
     title: "Fundorte",
-    icon: "key",
+    icon: "fundorte",
     a: "var(--umber)",
     b: "var(--sand)",
     feeds: [],
-    open: ["Fotos zu Gegenständen und Orten?", "Orte als Hierarchie (Wohnung, Zimmer, Schrank)?"],
   },
   {
     id: "analytics",
     title: "Analytics",
-    icon: "orb",
+    icon: "analytics",
     a: "var(--teal)",
     b: "var(--sand)",
     feeds: [],
-    open: ["Welche Zusammenhänge interessieren dich zuerst (Schlaf und Stimmung, Ausgaben und Tage)?"],
   },
   {
     id: "archiv",
     title: "Archiv",
-    icon: "scroll",
+    icon: "archiv",
     a: "var(--clay)",
     b: "var(--teal)",
     feeds: [],
-    open: [],
   },
   {
     id: "einstellungen",
     title: "Einstellungen",
-    icon: "wand",
+    icon: "einstellungen",
     a: "var(--moon)",
     b: "var(--teal)",
     feeds: [],
-    open: [],
   },
 ];
 

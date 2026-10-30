@@ -1,0 +1,358 @@
+/*
+ * Stile. Jeder Block setzt Farben, Schrift, Kachelform und Hintergrund.
+ * Die Farbnamen (teal, green, sand, clay, moss, umber, moon, gold) sind nur Platzhalter für
+ * die fünf Akzentfarben des Stils, ihre Bedeutung ist pro Stil eine andere.
+ */
+
+/* Gemeinsame Vorgaben, die jeder Stil überschreiben darf */
+[data-skin] {
+  --head-case: none; --head-ls: .02em; --head-weight: 600; --name-shadow: none; --motto-style: italic;
+  --tile-clip: none; --icon-sw: 1.5; --icon-glow: 7px; --font-mono: var(--font-display);
+  --glitter: 232,215,160; --glitter2: 232,215,160; --fly: 190,255,170;
+  --radius: 22px; --radius-m: 12px; --chip-radius: 999px; --chip-bg: var(--surface);
+  --ring-radius: 50%; --btn-shadow: none; --tile-shadow: none; --tile-border: 1px solid var(--line);
+  --tile-radius: 24px; --tile-inner-radius: 18px; --tile-inner: 1px solid transparent;
+  --tile-inner-inset: 6px; --tile-inner-clip: none; --tile-inner-bg: none; --m1: none; --m2: none;
+}
+.bd2, .bd5 { background-repeat: no-repeat; }
+
+/* ===================================================================
+   1. MONDLICHT: Mondteich
+   =================================================================== */
+[data-skin="mond-1"] {
+  --bg: #050b0c; --bg-2: #0b1c19; --text: #eaf3ee; --text-dim: #a4bbb2; --text-faint: #6f8a80;
+  --surface: rgba(190,230,215,.055); --surface-strong: rgba(190,230,215,.1); --line: rgba(200,235,225,.12);
+  --teal: #2fc7b8; --green: #5fbf8a; --sand: #d2ae7e; --clay: #c0704a; --moss: #7d9b5a; --umber: #8b6a4f; --moon: #e6efe9; --gold: #e8cf8f;
+  --tree: #030807; --moon-glow: rgba(214,238,232,.2);
+  --font: "Jost", -apple-system, "Segoe UI", sans-serif; --font-display: "Jost", -apple-system, sans-serif;
+  --head-case: uppercase; --head-ls: .14em; --head-weight: 500;
+  --scene: radial-gradient(520px 420px at 82% 4%, var(--moon-glow), transparent 70%),
+    radial-gradient(700px 500px at 0% 20%, color-mix(in srgb, var(--teal) 14%, transparent), transparent 65%),
+    radial-gradient(600px 500px at 100% 55%, color-mix(in srgb, var(--moss) 14%, transparent), transparent 65%),
+    linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 70%);
+  --m1: var(--shape-pines);
+  --ring: conic-gradient(from 210deg, var(--teal), var(--moon), var(--gold), var(--green), var(--teal));
+  --ring-shadow: 0 0 28px color-mix(in srgb, var(--teal) 45%, transparent), 0 0 70px color-mix(in srgb, var(--gold) 18%, transparent);
+  --avatar-bg: linear-gradient(145deg, color-mix(in srgb, var(--teal) 50%, #000), color-mix(in srgb, var(--moss) 50%, #000));
+  --name-shadow: 0 0 18px color-mix(in srgb, var(--teal) 35%, transparent);
+  --tile-bg: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--a) 26%, transparent), transparent 68%), var(--surface);
+  --tile-border: 1px solid color-mix(in srgb, var(--gold) 26%, var(--line));
+  --tile-shadow: 0 10px 30px rgba(0,0,0,.4), inset 0 0 30px color-mix(in srgb, var(--a) 10%, transparent);
+  --tile-ink: color-mix(in srgb, var(--a) 62%, var(--moon));
+  --tile-inner: 1px solid color-mix(in srgb, var(--gold) 18%, transparent);
+  --btn-bg: linear-gradient(135deg, var(--teal), var(--green)); --btn-ink: #04120e; --btn-shadow: 0 0 18px color-mix(in srgb, var(--teal) 30%, transparent);
+  --glitter: 232,215,160;
+}
+.backdrop[data-skin="mond-1"] .bd1 { display: block; background: var(--tree); opacity: .92; }
+.backdrop[data-skin="mond-1"] .bd3 { display: block; background: linear-gradient(180deg, color-mix(in srgb, var(--teal) 16%, var(--bg)) 0%, rgba(6,30,30,.9) 100%); }
+.backdrop[data-skin="mond-1"] .refl { display: block; right: 8%; top: 8%; width: 70px; height: 70%; border-radius: 50%; background: radial-gradient(ellipse at center, var(--moon-glow), transparent 70%); filter: blur(6px); animation: shimmer 5s ease-in-out infinite; }
+.backdrop[data-skin="mond-1"] .rip { display: block; right: calc(8% + 20px); top: 22%; width: 30px; height: 8px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--moon) 45%, transparent); opacity: 0; animation: ripple 6s ease-out infinite; }
+.backdrop[data-skin="mond-1"] .rip.r2 { animation-delay: 3s; top: 36%; }
+/* Mond zeigt sich auch in der Miniatur */
+.backdrop[data-skin="mond-1"] .bd4 { display: block; top: 14px; left: auto; right: 16px; bottom: auto; width: 44px; height: 44px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffdf0, var(--moon) 55%, color-mix(in srgb, var(--moon) 60%, var(--teal)) 100%);
+  box-shadow: 0 0 22px 6px var(--moon-glow);
+  -webkit-mask: radial-gradient(circle at 70% 38%, transparent 0 15px, #000 15.5px); mask: radial-gradient(circle at 70% 38%, transparent 0 15px, #000 15.5px); }
+.backdrop:not(.inner) .bd4 { display: none !important; }
+
+/* ===================================================================
+   2. MONDLICHT: Sternenhimmel
+   =================================================================== */
+[data-skin="mond-2"] {
+  --bg: #060616; --bg-2: #15133f; --text: #eceaff; --text-dim: #b0acd6; --text-faint: #7c78a8;
+  --surface: rgba(170,160,255,.07); --surface-strong: rgba(170,160,255,.13); --line: rgba(190,185,255,.16);
+  --teal: #8fb4ff; --green: #7be0c9; --sand: #e9d7a8; --clay: #c78ae0; --moss: #7388e0; --umber: #9b78c4; --moon: #f1f0ff; --gold: #f3e2a6;
+  --tree: #090a1e; --moon-glow: rgba(190,185,255,.25);
+  --font: "Outfit", -apple-system, "Segoe UI", sans-serif; --font-display: "Outfit", -apple-system, sans-serif;
+  --head-case: uppercase; --head-ls: .22em; --head-weight: 300;
+  --scene: radial-gradient(600px 500px at 80% 2%, rgba(150,140,255,.28), transparent 70%),
+    radial-gradient(700px 600px at 10% 40%, rgba(120,70,200,.22), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 78%);
+  --m1: var(--shape-mountains);
+  --ring: conic-gradient(from 180deg, var(--teal), var(--clay), var(--gold), var(--green), var(--teal));
+  --ring-shadow: 0 0 34px rgba(150,140,255,.5);
+  --avatar-bg: linear-gradient(145deg, #34307a, #14123a);
+  --tile-radius: 50%; --tile-inner-radius: 50%;
+  --tile-bg: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--a) 30%, transparent), transparent 70%), var(--surface);
+  --tile-border: 1px solid color-mix(in srgb, var(--a) 35%, var(--line));
+  --tile-shadow: 0 0 26px color-mix(in srgb, var(--a) 18%, transparent);
+  --tile-ink: color-mix(in srgb, var(--a) 55%, #fff);
+  --tile-inner: 1px dashed color-mix(in srgb, var(--gold) 22%, transparent);
+  --btn-bg: linear-gradient(135deg, #8fb4ff, #c78ae0); --btn-ink: #0b0a26; --btn-shadow: 0 0 20px rgba(150,140,255,.4);
+  --glitter: 245,244,255; --icon-sw: 1.3;
+}
+.backdrop[data-skin="mond-2"] .bd1 { display: block; bottom: 0; height: calc(var(--h) * 22); background: linear-gradient(180deg, #14123a, #07071a); }
+.backdrop[data-skin="mond-2"] .bd2 { display: block;
+  background-image:
+    radial-gradient(1.2px 1.2px at 8% 12%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 22% 30%, #dcd8ff 60%, transparent 62%),
+    radial-gradient(1.4px 1.4px at 37% 8%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 52% 22%, #cfd2ff 60%, transparent 62%),
+    radial-gradient(1.2px 1.2px at 66% 14%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 78% 34%, #e8e4ff 60%, transparent 62%),
+    radial-gradient(1.5px 1.5px at 90% 20%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 15% 52%, #d6d2ff 60%, transparent 62%),
+    radial-gradient(1.2px 1.2px at 44% 46%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 72% 58%, #dcd8ff 60%, transparent 62%),
+    radial-gradient(1.3px 1.3px at 30% 66%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 88% 70%, #e8e4ff 60%, transparent 62%);
+  animation: twinkle 4.5s ease-in-out infinite; }
+.backdrop[data-skin="mond-2"] .bd5 { display: block; opacity: .55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23b9b4ff' stroke-width='.5'%3E%3Cpolyline points='12,40 38,26 62,44 80,22 104,30'/%3E%3Cpolyline points='150,150 170,128 188,140 176,166'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='12' cy='40' r='1.4'/%3E%3Ccircle cx='38' cy='26' r='1.2'/%3E%3Ccircle cx='62' cy='44' r='1.4'/%3E%3Ccircle cx='80' cy='22' r='1.2'/%3E%3Ccircle cx='104' cy='30' r='1.5'/%3E%3Ccircle cx='150' cy='150' r='1.3'/%3E%3Ccircle cx='170' cy='128' r='1.2'/%3E%3Ccircle cx='188' cy='140' r='1.4'/%3E%3Ccircle cx='176' cy='166' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%; animation: twinkle 7s ease-in-out infinite reverse; }
+.backdrop[data-skin="mond-2"] .bd4 { display: block; top: 16px; left: auto; right: 14px; bottom: auto; width: 46px; height: 46px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, var(--moon) 60%, #b9b4ff); box-shadow: 0 0 26px 8px rgba(190,185,255,.45);
+  -webkit-mask: radial-gradient(circle at 70% 38%, transparent 0 16px, #000 16.5px); mask: radial-gradient(circle at 70% 38%, transparent 0 16px, #000 16.5px); }
+.backdrop:not(.inner) .bd4 { display: none !important; }
+
+/* ===================================================================
+   3. WALD: Moosiger Wald
+   =================================================================== */
+[data-skin="wald-1"] {
+  --bg: #08130b; --bg-2: #14291a; --text: #eef3e3; --text-dim: #b2c3a6; --text-faint: #788c6e;
+  --surface: rgba(170,210,120,.07); --surface-strong: rgba(170,210,120,.13); --line: rgba(190,225,150,.16);
+  --teal: #6fbf8f; --green: #94c15a; --sand: #dcc48e; --clay: #b9784e; --moss: #6f9a4a; --umber: #8a6a48; --moon: #f1f3dc; --gold: #e6d18a;
+  --tree: #050d07; --moon-glow: rgba(230,240,170,.2);
+  --font: "Manrope", -apple-system, "Segoe UI", sans-serif; --font-display: "Newsreader", Georgia, serif;
+  --head-weight: 500; --head-ls: .01em; --name-shadow: 0 0 22px rgba(150,210,110,.35);
+  --scene: linear-gradient(112deg, transparent 18%, rgba(230,240,170,.1) 24%, transparent 32%),
+    linear-gradient(104deg, transparent 38%, rgba(230,240,170,.07) 44%, transparent 52%),
+    linear-gradient(120deg, transparent 56%, rgba(230,240,170,.08) 60%, transparent 68%),
+    radial-gradient(700px 500px at 20% 0%, rgba(150,200,90,.2), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 80%);
+  --m1: var(--shape-hills); --m2: var(--shape-trunks);
+  --ring: conic-gradient(from 200deg, var(--green), var(--gold), var(--umber), var(--teal), var(--green));
+  --ring-shadow: 0 0 30px rgba(150,200,90,.35);
+  --avatar-bg: linear-gradient(145deg, #2f5a34, #14291a);
+  --tile-radius: 30px 8px 30px 8px; --tile-inner-radius: 24px 4px 24px 4px;
+  --tile-bg: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--a) 30%, transparent), transparent 70%), linear-gradient(160deg, rgba(60,95,45,.55), rgba(20,40,24,.7));
+  --tile-border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line));
+  --tile-shadow: 0 10px 24px rgba(0,0,0,.4);
+  --tile-ink: color-mix(in srgb, var(--a) 50%, #f4f7dc);
+  --tile-inner: 1px solid color-mix(in srgb, var(--gold) 16%, transparent);
+  --btn-bg: linear-gradient(135deg, var(--green), var(--teal)); --btn-ink: #0a1a0d;
+  --glitter: 232,226,150; --fly: 200,255,150;
+}
+.backdrop[data-skin="wald-1"] .bd2 { display: block; background: linear-gradient(90deg, #040a05, #0d1d10 40%, #0d1d10 60%, #040a05);
+  -webkit-mask: var(--m2) center / 100% 100% no-repeat; mask: var(--m2) center / 100% 100% no-repeat; opacity: .9; }
+.backdrop[data-skin="wald-1"] .bd1 { display: block; bottom: 0; height: calc(var(--h) * 28); background: linear-gradient(180deg, #17301b, #0b1a0e); opacity: .95; }
+.backdrop[data-skin="wald-1"] .bd3 { display: block; height: calc(var(--h) * 9);
+  background: radial-gradient(circle at 20% 30%, rgba(150,200,90,.35) 0 2px, transparent 3px) 0 0 / 22px 18px,
+    radial-gradient(circle at 70% 60%, rgba(90,150,70,.4) 0 2px, transparent 3px) 0 0 / 28px 20px, linear-gradient(180deg, #284a26, #122414); }
+
+/* ===================================================================
+   4. WALD: Nebelwald (hell)
+   =================================================================== */
+[data-skin="wald-2"] {
+  color-scheme: light;
+  --bg: #eef2e6; --bg-2: #cddcc4; --text: #15281c; --text-dim: #3e5a47; --text-faint: #6d8774;
+  --surface: rgba(255,255,255,.55); --surface-strong: rgba(255,255,255,.92); --line: rgba(30,70,45,.16);
+  --teal: #3f8f78; --green: #5f8f3f; --sand: #b59a62; --clay: #a5643f; --moss: #6f8a4a; --umber: #7a5f45; --moon: #ffffff; --gold: #a9812f;
+  --tree: #7fa08a; --moon-glow: rgba(255,244,205,.8);
+  --font: "Manrope", -apple-system, "Segoe UI", sans-serif; --font-display: "Manrope", -apple-system, sans-serif;
+  --head-weight: 600; --head-ls: .01em; --motto-style: normal;
+  --scene: radial-gradient(520px 420px at 15% 0%, rgba(255,240,190,.85), transparent 70%),
+    radial-gradient(700px 400px at 90% 35%, rgba(255,255,255,.7), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 70%);
+  --m1: var(--shape-hills); --m2: var(--shape-hills2);
+  --ring: conic-gradient(from 200deg, var(--teal), var(--gold), var(--green), var(--teal));
+  --ring-shadow: 0 8px 30px rgba(60,100,70,.3);
+  --avatar-bg: linear-gradient(145deg, #7aa88a, #3f6f55);
+  --tile-radius: 46% 54% 50% 50% / 55% 45% 55% 45%; --tile-inner-radius: 44% 56% 50% 50% / 55% 45% 55% 45%;
+  --tile-bg: radial-gradient(circle at 35% 25%, rgba(255,255,255,.95), color-mix(in srgb, var(--a) 22%, rgba(255,255,255,.7)) 80%);
+  --tile-border: 1px solid color-mix(in srgb, var(--moss) 35%, transparent);
+  --tile-shadow: 0 10px 22px rgba(50,90,60,.22), inset 0 -8px 16px rgba(60,100,70,.1);
+  --tile-ink: color-mix(in srgb, var(--a) 60%, #0e2316);
+  --tile-inner: 1px solid rgba(255,255,255,.7); --icon-glow: 0px; --icon-sw: 1.6;
+  --btn-bg: linear-gradient(135deg, #5f8f3f, #3f8f78); --btn-ink: #fff;
+  --glitter: 255,255,255; --glitter2: 255,255,255;
+}
+.backdrop[data-skin="wald-2"] .bd2 { display: block; bottom: calc(var(--h) * 8); top: auto; height: calc(var(--h) * 22); background: linear-gradient(180deg, rgba(120,160,130,.55), rgba(90,130,100,.75));
+  -webkit-mask: var(--m2) bottom / 100% 100% no-repeat; mask: var(--m2) bottom / 100% 100% no-repeat; }
+.backdrop[data-skin="wald-2"] .bd1 { display: block; bottom: 0; height: calc(var(--h) * 20); background: linear-gradient(180deg, #5f8a6c, #3e6650); }
+.backdrop[data-skin="wald-2"] .bd5 { display: block; background:
+  radial-gradient(500px 120px at 30% 55%, rgba(255,255,255,.55), transparent 70%),
+  radial-gradient(520px 140px at 80% 72%, rgba(255,255,255,.5), transparent 70%); }
+
+/* ===================================================================
+   5. MITTELALTER: Burg und Wappen
+   =================================================================== */
+[data-skin="ritter-1"] {
+  --bg: #120f0d; --bg-2: #2b2320; --text: #f1e8d4; --text-dim: #c5b898; --text-faint: #8d8168;
+  --surface: rgba(230,215,180,.06); --surface-strong: rgba(230,215,180,.12); --line: rgba(220,200,150,.18);
+  --teal: #d1a84a; --green: #4f7f5c; --sand: #d9caa0; --clay: #b0303a; --moss: #4a6a9a; --umber: #8a6440; --moon: #f0e6cc; --gold: #e6bd55;
+  --tree: #080605; --moon-glow: rgba(255,170,90,.2);
+  --font: "Alegreya Sans", Georgia, sans-serif; --font-display: "Cormorant Garamond", Georgia, serif;
+  --head-case: uppercase; --head-ls: .14em; --head-weight: 700; --motto-style: italic;
+  --scene: radial-gradient(900px 400px at 50% 78%, rgba(255,140,60,.35), transparent 70%),
+    radial-gradient(500px 400px at 85% 8%, rgba(255,200,140,.12), transparent 70%),
+    linear-gradient(180deg, #1c1722 0%, #3a2a30 55%, #5a3a2a 80%, #1a120e 100%);
+  --m1: var(--shape-castle);
+  --ring: conic-gradient(from 0deg, var(--gold), #7a5a1e, var(--gold), #f6e3a1, var(--gold));
+  --ring-shadow: 0 0 24px rgba(230,189,85,.35);
+  --avatar-bg: linear-gradient(145deg, #4a3a30, #1d1612);
+  --tile-radius: 8px 8px 50% 50% / 8px 8px 62% 62%; --tile-inner-radius: 4px 4px 50% 50% / 4px 4px 62% 62%;
+  --tile-bg: linear-gradient(170deg, rgba(120,96,70,.5), rgba(40,30,24,.85)), repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 6px, transparent 6px 12px);
+  --tile-border: 2px solid color-mix(in srgb, var(--gold) 55%, #3a2a10);
+  --tile-shadow: 0 8px 18px rgba(0,0,0,.55), inset 0 0 22px rgba(0,0,0,.45);
+  --tile-ink: color-mix(in srgb, var(--a) 40%, #f1e0b0);
+  --tile-inner: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); --icon-glow: 5px; --icon-sw: 1.6;
+  --btn-bg: linear-gradient(180deg, #e6bd55, #a8802a); --btn-ink: #1c1206;
+  --glitter: 255,150,60;
+}
+.backdrop[data-skin="ritter-1"] .bd1 { display: block; bottom: calc(var(--h) * 8); height: calc(var(--h) * 24); background: linear-gradient(180deg, #0c0908, #050403); }
+.backdrop[data-skin="ritter-1"] .bd3 { display: block; height: calc(var(--h) * 9); background: linear-gradient(180deg, #0c0908, #1b130e);
+  box-shadow: inset 0 2px 0 rgba(230,189,85,.25); }
+.backdrop[data-skin="ritter-1"] .bd2 { display: block; background:
+  linear-gradient(180deg, var(--clay), #6f1a22) 12px 0 / 34px 92px no-repeat,
+  linear-gradient(180deg, var(--clay), #6f1a22) calc(100% - 46px) 0 / 34px 92px no-repeat;
+  clip-path: none; }
+.backdrop[data-skin="ritter-1"] .bd2::before, .backdrop[data-skin="ritter-1"] .bd2::after { content: ""; position: absolute; top: 74px; width: 34px; height: 18px; background: var(--bg); clip-path: polygon(0 100%, 50% 0, 100% 100%); }
+.backdrop[data-skin="ritter-1"] .bd2::before { left: 12px; } .backdrop[data-skin="ritter-1"] .bd2::after { right: 12px; }
+
+/* ===================================================================
+   6. MITTELALTER: Schmiede
+   =================================================================== */
+[data-skin="ritter-2"] {
+  --bg: #0a0a0b; --bg-2: #1c1a19; --text: #ececec; --text-dim: #b3b0ac; --text-faint: #7d7a76;
+  --surface: rgba(255,255,255,.05); --surface-strong: rgba(255,255,255,.1); --line: rgba(255,255,255,.14);
+  --teal: #ff7a2f; --green: #aab4bd; --sand: #cfc7b8; --clay: #c0392b; --moss: #7a838c; --umber: #5a4a3e; --moon: #e8e8e8; --gold: #ffb347;
+  --tree: #050505; --moon-glow: rgba(255,120,40,.25);
+  --font: "Alegreya Sans", sans-serif; --font-display: "Pirata One", Georgia, serif;
+  --head-ls: .06em; --head-weight: 400; --name-shadow: 0 0 20px rgba(255,122,47,.4);
+  --scene: radial-gradient(800px 360px at 50% 105%, rgba(255,110,30,.5), transparent 70%),
+    radial-gradient(600px 400px at 50% 40%, rgba(255,255,255,.04), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg));
+  --ring: conic-gradient(from 90deg, #6c747b, #e3e8ec, #6c747b, #c9d0d6, #6c747b);
+  --ring-shadow: 0 0 22px rgba(255,122,47,.35); --ring-radius: 50%;
+  --avatar-bg: linear-gradient(145deg, #3a3633, #121110);
+  --tile-radius: 6px; --tile-inner-radius: 3px;
+  --tile-bg: radial-gradient(circle at 9px 9px, #d8dde1 0 2.5px, #5a5f64 3px 3.6px, transparent 4px),
+    radial-gradient(circle at calc(100% - 9px) 9px, #d8dde1 0 2.5px, #5a5f64 3px 3.6px, transparent 4px),
+    radial-gradient(circle at 9px calc(100% - 9px), #d8dde1 0 2.5px, #5a5f64 3px 3.6px, transparent 4px),
+    radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), #d8dde1 0 2.5px, #5a5f64 3px 3.6px, transparent 4px),
+    radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--a) 28%, transparent), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px),
+    linear-gradient(145deg, #4a4d51, #1d1e20 60%, #2b2d30);
+  --tile-border: 1px solid #6c7279;
+  --tile-shadow: 0 6px 14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -2px 6px rgba(0,0,0,.6);
+  --tile-ink: color-mix(in srgb, var(--a) 40%, #f0f0f0); --icon-glow: 6px; --icon-sw: 1.7;
+  --btn-bg: linear-gradient(180deg, #ff9a52, #d9531b); --btn-ink: #1a0b03; --btn-shadow: 0 0 16px rgba(255,122,47,.4);
+  --glitter: 255,140,50; --glitter2: 255,200,100;
+}
+.backdrop[data-skin="ritter-2"] .bd2 { display: block; background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' opacity='.07'%3E%3Cpath d='M40 30 160 150M160 30 40 150'/%3E%3Cpath d='M30 44 56 18M170 44 144 18M38 142l22 22M162 142l-22 22'/%3E%3Cpath d='M100 60c20 0 36 6 36 6v28c0 26-20 40-36 48-16-8-36-22-36-48V66s16-6 36-6Z'/%3E%3C/g%3E%3C/svg%3E") center 60px / 360px 360px no-repeat; }
+.backdrop[data-skin="ritter-2"] .bd3 { display: block; height: calc(var(--h) * 9); background: linear-gradient(180deg, transparent, rgba(255,100,20,.22)); }
+
+/* ===================================================================
+   7. SCI-FI: Neon Cyberpunk
+   =================================================================== */
+[data-skin="scifi-1"] {
+  --bg: #06030f; --bg-2: #160833; --text: #e8faff; --text-dim: #9ab8cf; --text-faint: #5d7792;
+  --surface: rgba(25,243,255,.05); --surface-strong: rgba(25,243,255,.1); --line: rgba(25,243,255,.22);
+  --teal: #19f3ff; --green: #39ff88; --sand: #ffe933; --clay: #ff2bd6; --moss: #8a5bff; --umber: #ff6b2b; --moon: #e8faff; --gold: #ffe933;
+  --tree: #04020a; --moon-glow: rgba(255,43,214,.3);
+  --font: "Chakra Petch", -apple-system, sans-serif; --font-display: "Chakra Petch", sans-serif; --font-mono: "Share Tech Mono", monospace;
+  --head-case: uppercase; --head-ls: .12em; --head-weight: 600; --motto-style: normal; --name-shadow: 0 0 14px rgba(25,243,255,.7), 2px 0 rgba(255,43,214,.7);
+  --scene: radial-gradient(600px 400px at 85% 10%, rgba(255,43,214,.28), transparent 70%),
+    radial-gradient(700px 500px at 0% 60%, rgba(25,243,255,.14), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 75%);
+  --m1: var(--shape-skyline);
+  --ring: conic-gradient(from 0deg, #19f3ff, #ff2bd6, #ffe933, #19f3ff);
+  --ring-shadow: 0 0 22px rgba(25,243,255,.6), 0 0 44px rgba(255,43,214,.35); --ring-radius: 8px;
+  --avatar-bg: linear-gradient(145deg, #2a0f5c, #08051a);
+  --tile-radius: 0; --tile-inner-radius: 0; --tile-clip: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  --tile-bg: linear-gradient(135deg, var(--a), var(--b)); --tile-border: none;
+  --tile-shadow: none;
+  --tile-ink: var(--a); --tile-inner: none; --icon-glow: 8px; --icon-sw: 1.5;
+  --tile-inner-inset: 1.5px; --tile-inner-bg: linear-gradient(160deg, #130a2e, #07040f);
+  --tile-inner-clip: polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px);
+  --radius: 4px; --radius-m: 3px; --chip-radius: 3px;
+  --btn-bg: linear-gradient(90deg, #19f3ff, #ff2bd6); --btn-ink: #06030f; --btn-shadow: 0 0 18px rgba(25,243,255,.5);
+  --glitter: 25,243,255; --glitter2: 255,43,214;
+}
+.backdrop[data-skin="scifi-1"] .bd1 { display: block; background: radial-gradient(circle, rgba(255,233,51,.85) 0 1px, transparent 1.6px) 0 0 / 9px 13px, #0b0620; opacity: .95; bottom: calc(var(--h) * 12); }
+.backdrop[data-skin="scifi-1"] .bd3 { display: block; height: calc(var(--h) * 24); background:
+  repeating-linear-gradient(90deg, rgba(255,43,214,.55) 0 1px, transparent 1px 36px),
+  repeating-linear-gradient(0deg, rgba(255,43,214,.55) 0 1px, transparent 1px 22px), linear-gradient(180deg, #140729, #2a0a40);
+  transform: perspective(160px) rotateX(48deg); transform-origin: bottom; -webkit-mask: linear-gradient(180deg, transparent, #000 45%); mask: linear-gradient(180deg, transparent, #000 45%); bottom: calc(var(--h) * -3); }
+.backdrop[data-skin="scifi-1"] .bd4 { display: block; background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); }
+
+/* ===================================================================
+   8. SCI-FI: Retro-Futurismus
+   =================================================================== */
+[data-skin="scifi-2"] {
+  --bg: #1a0b2e; --bg-2: #3b1456; --text: #fff4e6; --text-dim: #ddb8d8; --text-faint: #a37fa6;
+  --surface: rgba(255,255,255,.08); --surface-strong: rgba(255,255,255,.16); --line: rgba(255,200,230,.24);
+  --teal: #3ff2e0; --green: #a6ff6e; --sand: #ffd36a; --clay: #ff4fa3; --moss: #8a6bff; --umber: #ff8a3d; --moon: #fff4e0; --gold: #ffd36a;
+  --tree: #1a0b2e; --moon-glow: rgba(255,106,61,.3);
+  --font: "Space Grotesk", -apple-system, sans-serif; --font-display: "Orbitron", "Space Grotesk", sans-serif; --font-mono: "Orbitron", sans-serif;
+  --head-case: uppercase; --head-ls: .16em; --head-weight: 700; --motto-style: normal; --name-shadow: 0 2px 0 #ff4fa3, 0 0 20px rgba(255,79,163,.5);
+  --scene: linear-gradient(180deg, #1a0b2e 0%, #4b1760 38%, #b3306f 62%, #ff6a3d 76%, #ffb347 80%, #1a0b2e 80.2%);
+  --ring: conic-gradient(from 0deg, #3ff2e0, #ff4fa3, #ffd36a, #3ff2e0);
+  --ring-shadow: 0 0 24px rgba(255,79,163,.55);
+  --avatar-bg: linear-gradient(145deg, #5a1f78, #1a0b2e);
+  --tile-radius: 22px; --tile-inner-radius: 17px;
+  --tile-bg: linear-gradient(180deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,.08) 48%, rgba(0,0,0,.18) 52%, color-mix(in srgb, var(--a) 35%, rgba(26,11,46,.6)) 100%);
+  --tile-border: 2px solid rgba(255,255,255,.55);
+  --tile-shadow: 0 8px 0 rgba(0,0,0,.28), 0 0 22px color-mix(in srgb, var(--a) 40%, transparent), inset 0 2px 0 rgba(255,255,255,.7);
+  --tile-ink: #fff; --tile-inner: 1px solid rgba(255,255,255,.28); --icon-glow: 6px; --icon-sw: 1.8;
+  --btn-bg: linear-gradient(180deg, #ffd36a, #ff4fa3); --btn-ink: #2a0b3a; --btn-shadow: 0 4px 0 rgba(0,0,0,.3);
+  --glitter: 255,255,255;
+}
+.backdrop[data-skin="scifi-2"] .bd2 { display: block; left: 15%; right: 15%; top: auto; bottom: calc(var(--h) * 22); height: auto; aspect-ratio: 1; border-radius: 50%;
+  background: linear-gradient(180deg, #ffe27a, #ff4fa3);
+  -webkit-mask: repeating-linear-gradient(180deg, #000 0 14px, transparent 14px 18px) ; mask: repeating-linear-gradient(180deg, #000 0 14px, transparent 14px 18px); opacity: .95; }
+.backdrop[data-skin="scifi-2"] .bd3 { display: block; height: calc(var(--h) * 21); background:
+  repeating-linear-gradient(90deg, rgba(255,79,163,.9) 0 1.5px, transparent 1.5px 40px),
+  repeating-linear-gradient(0deg, rgba(255,79,163,.9) 0 1.5px, transparent 1.5px 20px), #1a0b2e;
+  box-shadow: 0 -2px 18px rgba(255,79,163,.7); }
+.backdrop[data-skin="scifi-2"] .bd5 { display: block; background-image: radial-gradient(1.2px 1.2px at 10% 8%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 40% 14%, #fff 60%, transparent 62%), radial-gradient(1.2px 1.2px at 70% 6%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 88% 16%, #fff 60%, transparent 62%), radial-gradient(1px 1px at 24% 24%, #fff 60%, transparent 62%); animation: twinkle 5s ease-in-out infinite; }
+
+/* ===================================================================
+   9. METALL: Schwarzstahl
+   =================================================================== */
+[data-skin="metall-1"] {
+  --bg: #090909; --bg-2: #181818; --text: #f0f0f0; --text-dim: #b4b4b4; --text-faint: #7a7a7a;
+  --surface: rgba(255,255,255,.04); --surface-strong: rgba(255,255,255,.09); --line: rgba(255,255,255,.16);
+  --teal: #e6e6e6; --green: #bdbdbd; --sand: #9e9e9e; --clay: #d4d4d4; --moss: #8c8c8c; --umber: #707070; --moon: #ffffff; --gold: #ffffff;
+  --moon-glow: rgba(255,255,255,.1);
+  --font: "Barlow", -apple-system, sans-serif; --font-display: "Barlow Condensed", sans-serif; --font-mono: "Barlow Condensed", sans-serif;
+  --head-case: uppercase; --head-ls: .2em; --head-weight: 600; --motto-style: normal;
+  --scene: repeating-linear-gradient(90deg, transparent 0 79px, rgba(255,255,255,.05) 79px 80px),
+    repeating-linear-gradient(0deg, transparent 0 119px, rgba(255,255,255,.05) 119px 120px),
+    radial-gradient(700px 500px at 50% 0%, rgba(255,255,255,.1), transparent 70%), linear-gradient(180deg, var(--bg-2), var(--bg));
+  --ring: conic-gradient(from 45deg, #fff, #555, #fff, #555, #fff);
+  --ring-shadow: 0 0 0 1px #000, 0 10px 30px rgba(0,0,0,.6); --ring-radius: 6px;
+  --avatar-bg: linear-gradient(145deg, #3a3a3a, #101010);
+  --tile-radius: 4px; --tile-inner-radius: 2px;
+  --tile-bg: repeating-linear-gradient(105deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px), linear-gradient(145deg, #3a3a3a, #141414 55%, #262626);
+  --tile-border: 1px solid #6a6a6a;
+  --tile-shadow: 0 6px 16px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 4px rgba(0,0,0,.6);
+  --tile-ink: #f2f2f2; --tile-inner: 1px solid rgba(255,255,255,.1); --icon-glow: 0px; --icon-sw: 1.4;
+  --radius: 4px; --radius-m: 3px; --chip-radius: 3px;
+  --btn-bg: linear-gradient(180deg, #f2f2f2, #9a9a9a); --btn-ink: #0a0a0a;
+}
+.backdrop[data-skin="metall-1"] .bd5 { display: block; background:
+  linear-gradient(#fff, #fff) 18px 18px / 18px 1px no-repeat, linear-gradient(#fff, #fff) 18px 18px / 1px 18px no-repeat,
+  linear-gradient(#fff, #fff) calc(100% - 18px) 18px / 18px 1px no-repeat, linear-gradient(#fff, #fff) calc(100% - 18px) 18px / 1px 18px no-repeat;
+  opacity: .22; }
+
+/* ===================================================================
+   10. METALL: Platin (hell)
+   =================================================================== */
+[data-skin="metall-2"] {
+  color-scheme: light;
+  --bg: #e8e9eb; --bg-2: #cdd0d4; --text: #0d0d0d; --text-dim: #3c3d40; --text-faint: #75777b;
+  --surface: rgba(255,255,255,.6); --surface-strong: rgba(255,255,255,.95); --line: rgba(0,0,0,.2);
+  --teal: #1a1a1a; --green: #2e2e2e; --sand: #4a4a4a; --clay: #111111; --moss: #5c5c5c; --umber: #777777; --moon: #ffffff; --gold: #000000;
+  --moon-glow: rgba(255,255,255,.8);
+  --font: "Space Grotesk", -apple-system, sans-serif; --font-display: "Space Grotesk", sans-serif; --font-mono: "IBM Plex Mono", monospace;
+  --head-case: uppercase; --head-ls: .14em; --head-weight: 600; --motto-style: normal;
+  --scene: repeating-linear-gradient(180deg, rgba(255,255,255,.55) 0 2px, rgba(0,0,0,.05) 2px 90px, rgba(255,255,255,.4) 90px 92px),
+    linear-gradient(180deg, var(--bg-2), var(--bg));
+  --ring: linear-gradient(145deg, #fff, #9a9da2 50%, #fff);
+  --ring-shadow: 0 8px 22px rgba(0,0,0,.28); --ring-radius: 10px;
+  --avatar-bg: linear-gradient(145deg, #8b8e93, #3b3d40);
+  --tile-radius: 10px; --tile-inner-radius: 6px;
+  --tile-bg: repeating-linear-gradient(100deg, rgba(0,0,0,.02) 0 1px, transparent 1px 3px), linear-gradient(160deg, #ffffff 0%, #d6d8db 45%, #f4f5f6 55%, #b9bcc1 100%);
+  --tile-border: 1px solid #8a8d92;
+  --tile-shadow: 0 8px 16px rgba(0,0,0,.22), inset 0 1px 0 #fff, inset 0 -2px 3px rgba(0,0,0,.15);
+  --tile-ink: #0d0d0d; --tile-inner: 1px solid rgba(0,0,0,.12); --icon-glow: 0px; --icon-sw: 1.6;
+  --radius: 12px; --radius-m: 8px; --chip-bg: linear-gradient(180deg, #fff, #d0d2d5);
+  --btn-bg: linear-gradient(180deg, #2a2a2a, #000); --btn-ink: #fff;
+}
