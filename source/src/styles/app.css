@@ -387,3 +387,12 @@ input, textarea { font: inherit; color: inherit; }
 .wp-metal { position: relative; width: 46px; height: 46px; }
 .wp-metal small { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
 .wp-sws.metals { padding-bottom: 18px; }
+/* Einklappbare Überschriften: Pfeil rechts, größer */
+.fold-head { display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; }
+.fold-head svg { width: 26px; height: 26px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; margin-right: 4px; }
+.fold-head svg.open { transform: rotate(90deg); }
+/* Sortieren per Ziehen */
+.sort-item { position: relative; transition: transform .18s ease; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sort-item:not(:last-child) .er-list-row { border-bottom: 1px solid var(--line); }
+.sort-item:last-child .er-list-row { border-bottom: none; }
+.sort-item.lifted { z-index: 3; background: var(--surface); box-shadow: 0 8px 22px rgba(0,0,0,.55), 0 0 0 1px var(--burgund-hell); border-radius: 10px; }

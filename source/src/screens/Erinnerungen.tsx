@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Icon } from "../components/Icon";
+import { FoldHead } from "../components/Fold";
+import { SortList } from "../components/SortList";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Arms, Reminder } from "../core/types";
@@ -183,17 +185,18 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       </div>
       {allLists.length > 0 && (
         <>
-          <button className="section eyebrow er-done-toggle" onClick={() => setListsOpen(!listsOpen)} aria-expanded={listsOpen}>Meine Listen {listsOpen ? "▾" : "▸"}</button>
-          {listsOpen && <div className="er-group">
-            {allLists.map((l) => (
-              <button key={l} className="er-list-row" onClick={() => setView({ kind: "list", name: l })}>
-                <span className="er-list-icon"><CoatOfArms arms={{ ...arms, charge: "keins" }} /></span>
-                <span className="er-list-name">{l}</span>
-                <span className="er-list-count">{items.filter((r) => r.category === l && !r.done).length}</span>
-                <Icon name="rechts" />
-              </button>
-            ))}
-          </div>}
+          <FoldHead label="Meine Listen" open={listsOpen} onToggle={() => setListsOpen(!listsOpen)} />
+          {listsOpen && (
+            <SortList className="er-group" items={allLists} keyOf={(l) => l} onReorder={setLists} onTap={(l) => setView({ kind: "list", name: l })}
+              render={(l) => (
+                <div className="er-list-row" role="button">
+                  <span className="er-list-icon"><CoatOfArms arms={{ ...arms, charge: "keins" }} /></span>
+                  <span className="er-list-name">{l}</span>
+                  <span className="er-list-count">{items.filter((r) => r.category === l && !r.done).length}</span>
+                  <Icon name="rechts" />
+                </div>
+              )} />
+          )}
         </>
       )}
     </>
@@ -272,7 +275,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         )}
         {!onlyDone && done.length > 0 && (
           <>
-            <button className="section eyebrow er-done-toggle" onClick={() => setShowDone((v) => !v)}>Erledigt ({done.length}) {showDone ? "▾" : "▸"}</button>
+            <FoldHead label={`Erledigt (${done.length})`} open={showDone} onToggle={() => setShowDone((v) => !v)} />
             {showDone && <div className="er-group">{done.map((r) => <Row key={r.id} r={r} />)}</div>}
           </>
         )}
