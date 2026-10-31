@@ -15,10 +15,10 @@ type SmartId = "heute" | "geplant" | "fristen" | "alle" | "erledigt";
 type View = { kind: "smart"; id: SmartId } | { kind: "list"; name: string } | { kind: "kalender" } | null;
 const SMART = [
   { id: "heute", name: "Heute" },
-  { id: "geplant", name: "Geplant" },
+  { id: "geplant", name: "Vorgemerkt" },
   { id: "fristen", name: "Fristen" },
   { id: "alle", name: "Alle" },
-  { id: "erledigt", name: "Erledigt" },
+  { id: "erledigt", name: "Vollbracht" },
 ] as const;
 
 function fmtDate(r: Reminder) {
@@ -60,9 +60,9 @@ const local = (d: Date) => `${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.ge
 /** Kalendereintrag als .ics. iOS bietet beim Öffnen „Zum Kalender hinzufügen“ an. */
 const stamp = () => new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 const allDay = (d: string) => { const n = new Date(d + "T12:00:00"); n.setDate(n.getDate() + 1); return [`DTSTART;VALUE=DATE:${d.replace(/-/g, "")}`, `DTEND;VALUE=DATE:${n.getFullYear()}${two(n.getMonth() + 1)}${two(n.getDate())}`]; };
-const fristEvent = (r: Reminder, kind: "Fristablauf" | "Vorfrist", d: string) => [
+const fristEvent = (r: Reminder, kind: "Galgenfrist" | "Gnadenfrist", d: string) => [
   "BEGIN:VEVENT", `UID:${r.id}-${kind}@app`, `DTSTAMP:${stamp()}`, ...allDay(d), `SUMMARY:${esc(kind + ": " + r.title)}`,
-  r.notes ? `DESCRIPTION:${esc(r.notes)}` : "", kind === "Fristablauf" ? "PRIORITY:1" : "",
+  r.notes ? `DESCRIPTION:${esc(r.notes)}` : "", kind === "Galgenfrist" ? "PRIORITY:1" : "",
   "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc(kind + ": " + r.title)}`, "TRIGGER:PT8H", "END:VALARM", "END:VEVENT",
 ];
 
@@ -80,8 +80,8 @@ function exportIcs(r: Reminder) {
   }
   const ics = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//App//Erinnerungen//DE", "CALSCALE:GREGORIAN",
-    ...(r.frist ? fristEvent(r, "Fristablauf", r.frist) : []),
-    ...(r.vorfrist ? fristEvent(r, "Vorfrist", r.vorfrist) : []),
+    ...(r.frist ? fristEvent(r, "Galgenfrist", r.frist) : []),
+    ...(r.vorfrist ? fristEvent(r, "Gnadenfrist", r.vorfrist) : []),
     ...(r.date ? ["BEGIN:VEVENT", `UID:${r.id}@app`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`, ...when,
     `SUMMARY:${esc(r.title)}`,
     r.repeat === "monat-tag" ? `RRULE:FREQ=MONTHLY;BYMONTHDAY=${r.repeatDay ?? Number(r.date.slice(8))}` : "",
@@ -237,8 +237,8 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
             <div className="s">
               {r.date && <span className={late ? "er-late" : ""}>{fmtDate(r)}</span>}
               {r.repeat && r.date && <span className="er-repeat">{repeatLabel(r.repeat, r.date).replace("Monatlich am", "monatl.")}</span>}
-              {r.vorfrist && <span className={"er-vf" + (!r.done && r.vorfrist <= today ? " due" : "")}>VF {short(r.vorfrist)}</span>}
-              {r.frist && <span className={"er-frist" + (!r.done && r.frist <= today ? " due" : "")}>Frist {short(r.frist)}</span>}
+              {r.vorfrist && <span className={"er-vf" + (!r.done && r.vorfrist <= today ? " due" : "")}>Gnade {short(r.vorfrist)}</span>}
+              {r.frist && <span className={"er-frist" + (!r.done && r.frist <= today ? " due" : "")}>Galgen {short(r.frist)}</span>}
               {view?.kind === "smart" && r.category && <span>{r.category}</span>}
               {r.subs && <span>{r.subs.filter((x) => x.done).length}/{r.subs.length}</span>}
             </div>
@@ -255,7 +255,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
           </div>
         )}
         </div>
-        {(r.date || r.frist) && !r.done && <button className="icon-btn" onClick={() => exportIcs(r)} aria-label="Zum Kalender hinzufügen"><Icon name="kalender" /></button>}
+        {(r.date || r.frist) && !r.done && <button className="icon-btn" onClick={() => exportIcs(r)} aria-label="In den Almanach eintragen"><Icon name="kalender" /></button>}
       </div>
     );
   };
@@ -270,7 +270,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       <div className="er-smart">
         {SMART.map((s) => (
           <button key={s.id} className="card er-smart-card" onClick={() => setView({ kind: "smart", id: s.id })}>
-            <span className={"er-smart-icon" + (s.id === "fristen" ? " frist" : "")}><Icon name={s.id === "erledigt" ? "haken" : s.id === "alle" ? "archiv" : s.id === "fristen" ? "schwert" : "kalender"} /></span>
+            <span className={"er-smart-icon" + (s.id === "fristen" ? " frist" : "")}><Icon name={s.id === "erledigt" ? "haken" : s.id === "alle" ? "archiv" : s.id === "fristen" ? "sanduhr" : "kalender"} /></span>
             <span className="er-smart-count">{items.filter((r) => inSmart(s.id, r)).length}</span>
             <span className="er-smart-name">{s.name}</span>
           </button>
@@ -278,12 +278,12 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         <button className="card er-smart-card" onClick={() => setView({ kind: "kalender" })}>
           <span className="er-smart-icon"><Icon name="kalender" /></span>
           <span className="er-smart-count">{new Date().getDate()}</span>
-          <span className="er-smart-name">Kalender</span>
+          <span className="er-smart-name">Almanach</span>
         </button>
       </div>
       {allLists.length > 0 && (
         <>
-          <FoldHead label="Meine Listen" open={listsOpen} onToggle={() => setListsOpen(!listsOpen)} />
+          <FoldHead label="Meine Rollen" open={listsOpen} onToggle={() => setListsOpen(!listsOpen)} />
           {listsOpen && (
             <SortList className="er-group" items={allLists} keyOf={(l) => l} onReorder={setLists} onTap={(l) => setView({ kind: "list", name: l })}
               render={(l) => (
@@ -295,7 +295,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
                 </div>
               )} />
           )}
-          {listsOpen && <button className="er-addlist" onClick={() => setListSheet({ name: "", arms: baseArms })}>+ Neue Liste</button>}
+          {listsOpen && <button className="er-addlist" onClick={() => setListSheet({ name: "", arms: baseArms })}>+ Neue Rolle</button>}
         </>
       )}
     </>
@@ -315,7 +315,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       <>
         <div className="topbar">
           <button className="back" onClick={() => setView(null)} aria-label="Zurück"><Icon name="back" /></button>
-          <h1>Kalender</h1>
+          <h1>Almanach</h1>
         </div>
         <div className="card zy-cal">
           <div className="zy-head">
@@ -344,8 +344,8 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         <div className="er-group">
           {sel.map((r) => (
             <div key={r.id} className={r.frist === calDay ? "er-cal-frist" : r.vorfrist === calDay ? "er-cal-vf" : ""}>
-              {r.frist === calDay && <div className="er-cal-tag">Fristablauf</div>}
-              {r.vorfrist === calDay && r.frist !== calDay && <div className="er-cal-tag">Vorfrist</div>}
+              {r.frist === calDay && <div className="er-cal-tag">Galgenfrist</div>}
+              {r.vorfrist === calDay && r.frist !== calDay && <div className="er-cal-tag">Gnadenfrist</div>}
               <Row r={r} />
             </div>
           ))}
@@ -375,11 +375,11 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
           {(onlyDone ? done : open).length === 0 && <div className="empty">Keine Erinnerungen</div>}
         </div>
         {onlyDone && done.length > 0 && (
-          <button className="er-clear" onClick={() => setItems((p) => p.filter((r) => !base.includes(r)))}>Alle löschen</button>
+          <button className="er-clear" onClick={() => setItems((p) => p.filter((r) => !base.includes(r)))}>Alle verbannen</button>
         )}
         {!onlyDone && done.length > 0 && (
           <>
-            <FoldHead label={`Erledigt (${done.length})`} open={showDone} onToggle={() => setShowDone((v) => !v)} />
+            <FoldHead label={`Vollbracht (${done.length})`} open={showDone} onToggle={() => setShowDone((v) => !v)} />
             {showDone && <div className="er-group">{done.map((r) => <Row key={r.id} r={r} />)}</div>}
           </>
         )}
@@ -399,11 +399,11 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-head">
               <button className="sheet-btn" onClick={() => setListSheet(null)} aria-label="Abbrechen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
-              <span>{listSheet.orig ? "Liste" : "Neue Liste"}</span>
-              <button className={"sheet-btn ok" + (listSheet.name.trim() ? "" : " off")} onClick={saveListSheet} aria-label="Sichern"><Icon name="haken" /></button>
+              <span>{listSheet.orig ? "Rolle" : "Neue Rolle"}</span>
+              <button className={"sheet-btn ok" + (listSheet.name.trim() ? "" : " off")} onClick={saveListSheet} aria-label="Besiegeln"><Icon name="haken" /></button>
             </div>
             <div className="sheet-card">
-              <input className="sheet-in big" value={listSheet.name} onChange={(e) => setListSheet({ ...listSheet, name: e.target.value })} placeholder="Name der Liste" autoFocus={!listSheet.orig} />
+              <input className="sheet-in big" value={listSheet.name} onChange={(e) => setListSheet({ ...listSheet, name: e.target.value })} placeholder="Name der Rolle" autoFocus={!listSheet.orig} />
               <hr />
               <ArmsMini arms={listSheet.arms} onChange={(a) => setListSheet({ ...listSheet, arms: a })} />
             </div>
@@ -416,7 +416,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
             <div className="sheet-head">
               <button className="sheet-btn" onClick={() => setDraft(null)} aria-label="Abbrechen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
               <span>{isNew ? "Neue Erinnerung" : "Details"}</span>
-              <button className={"sheet-btn ok" + (d.title.trim() ? "" : " off")} onClick={save} aria-label="Sichern"><Icon name="haken" /></button>
+              <button className={"sheet-btn ok" + (d.title.trim() ? "" : " off")} onClick={save} aria-label="Besiegeln"><Icon name="haken" /></button>
             </div>
 
             <div className="sheet-card">
@@ -465,15 +465,15 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
             <div className="sheet-label">Frist</div>
             <div className="sheet-card rows">
               <div className="sheet-row">
-                <span className="sheet-ic frist"><Icon name="schwert" /></span>
-                <span className="sheet-name">Fristablauf{d.frist && <small>{short(d.frist)}</small>}</span>
+                <span className="sheet-ic frist"><Icon name="sanduhr" /></span>
+                <span className="sheet-name">Galgenfrist{d.frist && <small>{short(d.frist)}</small>}</span>
                 <Toggle on={!!d.frist} onChange={(v) => upd(v ? { frist: d.frist ?? addDays(today, 14), vorfrist: d.vorfrist ?? addDays(d.frist ?? addDays(today, 14), -7) } : { frist: undefined, vorfrist: undefined })} />
               </div>
               {d.frist && <div className="sheet-sub"><input className="sheet-in" type="date" value={d.frist} onChange={(e) => upd({ frist: e.target.value || d.frist })} /></div>}
               {d.frist && (
                 <div className="sheet-row">
                   <span className="sheet-ic"><Icon name="kalender" /></span>
-                  <span className="sheet-name">Vorfrist{d.vorfrist && <small>{short(d.vorfrist)}</small>}</span>
+                  <span className="sheet-name">Gnadenfrist{d.vorfrist && <small>{short(d.vorfrist)}</small>}</span>
                   <Toggle on={!!d.vorfrist} onChange={(v) => upd({ vorfrist: v ? addDays(d.frist!, -7) : undefined })} />
                 </div>
               )}
@@ -483,24 +483,24 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
             <div className="sheet-label">Weitere Optionen</div>
             <div className="sheet-card rows">
               <label className="sheet-row">
-                <span className="sheet-ic arms"><CoatOfArms arms={{ ...arms, charge: "keins" }} /></span>
-                <span className="sheet-name">Liste</span>
+                <span className="sheet-ic"><Icon name="rolle" /></span>
+                <span className="sheet-name">Rolle</span>
                 <select className="sheet-select" value={d.category} onChange={(e) => upd({ category: e.target.value })}>
                   <option value="">Keine</option>
                   {allLists.map((l) => <option key={l} value={l}>{l}</option>)}
-                  <option value={NEW}>Neue Liste</option>
+                  <option value={NEW}>Neue Rolle</option>
                 </select>
                 <Icon name="rechts" />
               </label>
               {d.category === NEW && (
                 <div className="sheet-sub">
-                  <input className="sheet-in" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="Name der Liste" />
+                  <input className="sheet-in" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="Name der Rolle" />
                   <ArmsMini arms={newArms ?? baseArms} onChange={setNewArms} />
                 </div>
               )}
             </div>
 
-            {!isNew && <button className="sheet-del" onClick={() => remove(d.id)}>Erinnerung löschen</button>}
+            {!isNew && <button className="sheet-del" onClick={() => remove(d.id)}>Erinnerung verbannen</button>}
           </div>
         </div>
       )}

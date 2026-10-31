@@ -22,11 +22,11 @@ export interface ModuleDef {
 export const modules: ModuleDef[] = [
   {
     id: "zyklus",
-    title: "Zyklus",
+    title: "Mondlauf",
     icon: "zyklus",
     a: "var(--clay)",
     b: "var(--sand)",
-    feeds: [{ id: "cycleDay", label: "Zyklustag" }],
+    feeds: [{ id: "cycleDay", label: "Mondtag" }],
   },
   {
     id: "erinnerungen",
@@ -38,7 +38,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "gefuehle",
-    title: "Gefühle",
+    title: "Gemüt",
     icon: "gefuehle",
     a: "var(--teal)",
     b: "var(--green)",
@@ -46,15 +46,15 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "gewohnheiten",
-    title: "Gewohnheiten",
+    title: "Gelübde",
     icon: "gewohnheiten",
     a: "var(--green)",
     b: "var(--moss)",
-    feeds: [{ id: "habits", label: "Gewohnheiten" }],
+    feeds: [{ id: "habits", label: "Gelübde" }],
   },
   {
     id: "finanzen",
-    title: "Finanzen",
+    title: "Säckel",
     icon: "finanzen",
     a: "var(--moss)",
     b: "var(--teal)",
@@ -62,7 +62,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "fundorte",
-    title: "Fundorte",
+    title: "Schatzkarte",
     icon: "fundorte",
     a: "var(--umber)",
     b: "var(--sand)",
@@ -70,7 +70,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "analytics",
-    title: "Analytics",
+    title: "Seelenspiegel",
     icon: "analytics",
     a: "var(--teal)",
     b: "var(--sand)",
@@ -78,7 +78,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "archiv",
-    title: "Archiv",
+    title: "Annalen",
     icon: "archiv",
     a: "var(--clay)",
     b: "var(--teal)",
@@ -86,7 +86,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "befinden",
-    title: "Befinden",
+    title: "Siechenbuch",
     icon: "befinden",
     a: "var(--teal)",
     b: "var(--moss)",

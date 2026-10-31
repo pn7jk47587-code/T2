@@ -84,7 +84,7 @@ blessed|Gesegnet|Dankbar und glücklich über das, was du hast
 blissful|Selig|Voller Freude
 calm|Ruhig|Frei von Stress, Unruhe und Sorgen
 carefree|Sorglos|Frei von Sorgen und unbeschwert
-chill|Gechillt|Locker und entspannt
+chill|Gemächlich|Locker und entspannt
 clear|Klar|Das Gefühl, Ereignisse oder Situationen, vor denen du stehst, wahrnehmen, verstehen oder deuten zu können
 comfortable|Behaglich|Beruhigt an Körper und Geist
 compassionate|Mitfühlend|Fürsorge und Anteilnahme für jemanden zeigen
@@ -105,7 +105,7 @@ loved|Geliebt|Das Gefühl, dass jemand sich sehr um dich sorgt
 loving|Liebevoll|Liebe für jemanden empfinden
 mellow|Gelassen|Entspannt und locker; unkompliziert
 moved|Bewegt|Ein plötzliches Gefühl, nachdem du etwas Inspirierendes oder Trauriges gesehen hast
-ok|Okay|Ein zurückhaltendes Wohlgefühl, zufriedenstellend, aber weder außergewöhnlich noch intensiv
+ok|Leidlich|Ein zurückhaltendes Wohlgefühl, zufriedenstellend, aber weder außergewöhnlich noch intensiv
 peaceful|Friedlich|Still und ruhig; ungestört
 pensive|Nachdenklich|In Betrachtungen oder tiefe, ernste Gedanken versunken
 poised|Gefasst|Beherrscht und selbstsicher
@@ -135,7 +135,7 @@ understood|Verstanden|Das Gefühl, dass jemand dich versteht
 validated|Bestätigt|Das Gefühl, gesehen und angenommen zu werden
 valued|Geschätzt|Das Gefühl, wichtig zu sein
 whole|Ganz|Innere Fülle und Wohlbefinden
-zen|Zen|Locker gesagt: ganz im Moment und ruhig`;
+zen|In sich ruhend|Locker gesagt: ganz im Moment und ruhig`;
 
 const BLAU = `abandoned|Verlassen|Zurückgelassen und nicht beachtet, gewollt oder umsorgt
 abused|Misshandelt|Grausame oder ungerechte Behandlung erfahren
@@ -151,7 +151,7 @@ bored|Gelangweilt|Ohne Interesse an etwas oder jemandem
 brooding|Grübelnd|Mit bedrückenden oder schmerzhaften Gedanken beschäftigt
 burdened|Belastet|Beschwert von etwas oder jemandem und dafür verantwortlich
 burned-out|Ausgebrannt|Erschöpft von anhaltendem Stress
-cancelled|Gecancelt|Ausgestoßen wegen eines vermeintlichen Fehltritts
+cancelled|Geächtet|Ausgestoßen wegen eines vermeintlichen Fehltritts
 crushed|Am Boden zerstört|Überwältigend enttäuscht oder im Stich gelassen
 dead-inside|Innerlich tot|So niedergeschlagen, dass es sich anfühlt, als hättest du deinen Lebensgeist oder deine Seele verloren
 defeated|Besiegt|Entmutigt oder von Widrigkeiten überwältigt
@@ -174,7 +174,7 @@ disillusioned|Desillusioniert|Enttäuscht von jemandem, der deinem Glauben an ih
 dispirited|Verzagt|Begeisterung und Hoffnung verloren
 disrespected|Missachtet|Nicht so behandelt, als zählten deine Ideen und Gefühle
 dissatisfied|Missvergnügt|Unglücklich mit jemandem oder etwas
-down|Down|Traurig und mit wenig Energie
+down|Niedergedrückt|Traurig und mit wenig Energie
 empty|Leer|Ohne Sinn oder Verbindung
 excluded|Ausgeschlossen|Außen vor gelassen und in einer gewünschten Gruppe unerwünscht
 exhausted|Erschöpft|Völlig ohne Energie
@@ -182,7 +182,7 @@ fatigued|Ermattet|Körperlich ausgelaugt
 forlorn|Trübselig|Traurig und allein zugleich
 fragile|Zerbrechlich|Zart, als könntest du leicht zerbrechen
 gaslit|Manipuliert|So manipuliert, dass du an deiner Wahrnehmung der Wirklichkeit zweifelst
-ghosted|Geghostet|Ohne Erklärung von jeder Kommunikation abgeschnitten
+ghosted|Wortlos verlassen|Ohne Erklärung von jeder Kommunikation abgeschnitten
 glum|Missmutig|Unzufrieden; pessimistisch mit Blick auf künftige Ereignisse
 grief|Trauer|Schmerz beim Verlust eines Menschen oder einer wichtigen Sache
 groggy|Benommen|Schläfrig, matt, verwirrt und langsam in der Reaktion
@@ -210,7 +210,7 @@ longing|Sehnsucht|Starkes, anhaltendes Verlangen, besonders nach etwas Fernem od
 lost|Verloren|Unangenehm allein und ohne Richtung
 lovesick|Liebeskrank|Von jemandem träumen, den du liebst, oder ihn vermissen
 malaised|Unwohl|Unruhig und verunsichert, ohne echten Grund
-meh|Meh|Uninspiriert oder lustlos
+meh|Lau|Uninspiriert oder lustlos
 melancholic|Melancholisch|Schon eine Weile leicht traurig
 minimized|Kleingemacht|Durch Worte oder Taten anderer herabgesetzt oder weniger wert
 miserable|Elend|Sich absolut schrecklich fühlen
@@ -236,7 +236,7 @@ suffocated|Erdrückt|Gefangen oder unterdrückt, als bekämst du keine Luft
 sullen|Mürrisch|Schlechte Laune stumm zeigen
 tired|Müde|Das Gefühl, Ruhe zu brauchen
 trapped|Gefangen|Das Gefühl, dass es keinen Ausweg gibt
-turned-off|Abgetörnt|Das Interesse an jemandem verlieren, weil er etwas Inakzeptables getan hat
+turned-off|Erkaltet|Das Interesse an jemandem verlieren, weil er etwas Inakzeptables getan hat
 unappreciated|Ungewürdigt|Nicht den Dank oder die Anerkennung bekommen, die du verdient zu haben glaubst
 uncomfortable|Unbehaglich|Unbehagen durch Ungewissheit
 undervalued|Unterschätzt|Das Gefühl, nicht genug geschätzt zu werden
@@ -277,7 +277,7 @@ enraged|Außer sich|Von etwas in Rage versetzt; voll äußerster Wut
 envious|Neidisch|Verlangen nach etwas, das jemand anderes hat
 exasperated|Entnervt|Heftige Gereiztheit erleben
 flabbergasted|Verdattert|Heftige Überraschung oder Bestürzung
-fomo|FOMO|Angst, etwas zu verpassen
+fomo|Versäumnisangst|Angst, etwas zu versäumen
 foolish|Töricht|Befangen, nachdem du etwas Unkluges getan hast
 frazzled|Abgekämpft|Erschöpft, durcheinander und emotional aufgerieben
 frightened|Verschreckt|Verängstigt oder furchtsam
@@ -322,7 +322,7 @@ stunned|Fassungslos|Verwirrt oder verblüfft von einem Ereignis
 taken-aback|Vor den Kopf gestoßen|Überrascht von etwas Unangenehmem oder Kränkendem
 tense|Angespannt|Unfähig, dich zu entspannen
 terrified|Zu Tode erschrocken|Von Angst verzehrt
-triggered|Getriggert|Von etwas ausgelöst oder aktiviert
+triggered|Aufgestachelt|Von etwas ausgelöst oder aktiviert
 troubled|Beunruhigt|Besorgt wegen eines Problems oder Konflikts
 uncertain|Ungewiss|Mangel an Klarheit oder Zuversicht in Bezug auf etwas
 uneasy|Unruhig|Ein vages Gefühl, dass etwas nicht stimmt

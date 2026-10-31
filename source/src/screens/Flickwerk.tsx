@@ -67,7 +67,7 @@ export function Flickwerk({ mod, back }: { mod: ModuleDef; back: () => void }) {
           <small>Flicktag</small>
           <input type="date" className="sheet-in" value={day} min={todayISO()} onChange={(e) => setDay(e.target.value)} />
         </label>
-        {day && open.length > 0 && <button className="icon-btn" onClick={() => icsDownload(day, open.length)} aria-label="Zum Kalender hinzufügen"><Icon name="kalender" /></button>}
+        {day && open.length > 0 && <button className="icon-btn" onClick={() => icsDownload(day, open.length)} aria-label="In den Almanach eintragen"><Icon name="kalender" /></button>}
       </div>
 
       <div className="fw-grid">
@@ -90,7 +90,7 @@ export function Flickwerk({ mod, back }: { mod: ModuleDef; back: () => void }) {
             <div className="sheet-head">
               <button className="sheet-btn" onClick={() => setEdit(null)} aria-label="Abbrechen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
               <span>{isNew ? "Neues Kleidungsstück" : "Kleidungsstück"}</span>
-              <button className="sheet-btn ok" onClick={save} aria-label="Sichern"><Icon name="haken" /></button>
+              <button className="sheet-btn ok" onClick={save} aria-label="Besiegeln"><Icon name="haken" /></button>
             </div>
             <input ref={file} type="file" accept="image/*" hidden onChange={async (e) => {
               const f = e.target.files?.[0]; if (!f) return;
@@ -113,7 +113,7 @@ export function Flickwerk({ mod, back }: { mod: ModuleDef; back: () => void }) {
                 <button className="fw-done-btn" onClick={() => { setPieces((p) => p.map((x) => (x.id === edit.id ? { ...edit, done: !edit.done, doneAt: edit.done ? undefined : Date.now() } : x))); setEdit(null); }}>
                   {edit.done ? "Wieder offen" : "Geflickt"}
                 </button>
-                <button className="sheet-del" onClick={() => { setPieces((p) => p.filter((x) => x.id !== edit.id)); setEdit(null); }}>Kleidungsstück löschen</button>
+                <button className="sheet-del" onClick={() => { setPieces((p) => p.filter((x) => x.id !== edit.id)); setEdit(null); }}>Kleidungsstück verbannen</button>
               </>
             )}
           </div>

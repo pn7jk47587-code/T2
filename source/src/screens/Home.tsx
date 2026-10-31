@@ -59,9 +59,9 @@ export function Home({ go }: { go: (id: string) => void }) {
         )}
       </header>
 
-      <section className="card overview" aria-label="Tagesüberblick">
+      <section className="card overview" aria-label="Tageslosung">
         <div className="overview-head">
-          <h2>Tagesüberblick</h2>
+          <h2>Tageslosung</h2>
           <span>{today()}</span>
         </div>
         <div className="metrics">

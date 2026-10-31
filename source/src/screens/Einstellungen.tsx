@@ -51,7 +51,7 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
         </div>
       </div>
 
-      <div className="section eyebrow">Stil</div>
+      <div className="section eyebrow">Anwendungsgewandung</div>
       <button className="card row" style={{ width: "100%", textAlign: "left" }} onClick={() => nav("stile")}>
         <div>
           <div className="t">{getSkin(skin.id).name}</div>

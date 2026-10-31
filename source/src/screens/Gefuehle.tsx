@@ -80,7 +80,7 @@ export function Gefuehle({ back }: { mod: ModuleDef; back: () => void }) {
       <div className="gf-bar-text">
         {sel ? <><b style={{ color: colorById(sel.color).bubble }}>{sel.name}</b><span>{sel.desc}</span></> : <span>Tippe auf das Gefühl, das am besten beschreibt, wie du dich gerade fühlst</span>}
       </div>
-      <button className={"gf-go" + (sel ? "" : " off")} onClick={save} disabled={!sel} aria-label="Speichern"><Icon name="rechts" /></button>
+      <button className={"gf-go" + (sel ? "" : " off")} onClick={save} disabled={!sel} aria-label="Besiegeln"><Icon name="rechts" /></button>
     </div>
   );
 
@@ -117,7 +117,7 @@ export function Gefuehle({ back }: { mod: ModuleDef; back: () => void }) {
           </svg>
           <button className="gf-checkin" onClick={() => setStep("farbe")}>
             <span className="gf-plus">+</span>
-            <span>Einchecken</span>
+            <span>Einkehren</span>
           </button>
         </div>
         {todays.length > 0 && (

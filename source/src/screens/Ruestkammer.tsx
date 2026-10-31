@@ -138,7 +138,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const dom = dominantColor(feel[todayISO()]);
   const lines = (() => {
     const today = new Date();
-    const out = [`// ${today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`, "tagesueberblick {"];
+    const out = [`// Bibliothek · ${today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`, "tageslosung {"];
     for (const m of overviewItems) out.push(`  ${m.label.toLowerCase().replace(/ /g, "_")}: ${ov[m.id] ?? "—"}`);
     out.push("}");
     const open = rem.filter((r) => !r.done);

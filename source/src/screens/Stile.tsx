@@ -43,7 +43,7 @@ export function Stile({ back, current, choose }: { back: () => void; current: st
         <button className="back" onClick={back} aria-label="Zurück">
           <Icon name="back" />
         </button>
-        <h1>Stile</h1>
+        <h1>Anwendungsgewandung</h1>
       </div>
       <div className="carousel" ref={scroller}>
         {skins.map((s) => (
