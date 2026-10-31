@@ -88,7 +88,8 @@ export function CoatOfArms({ arms, className, style }: { arms: Arms; className?:
         </linearGradient>
         {metal && light.map(([x1, y1, x2, y2], i) => (
           /* Facettenkante an der Teilungslinie: hell davor, abrupt dunkler danach, dann wieder Glanz */
-          <linearGradient key={i} id={`${id}m${i}`} gradientUnits="userSpaceOnUse" x1={x1} y1={y1} x2={x2} y2={y2}>
+          <linearGradient key={i} id={`${id}m${i}`} gradientUnits="userSpaceOnUse"
+            x1={(x1 - 18) / 2.67} y1={(y1 - 24) / 2.67} x2={(x2 - 18) / 2.67} y2={(y2 - 24) / 2.67}>
             <stop offset="0" stopColor={metal.dark} /><stop offset=".38" stopColor={metal.base} />
             <stop offset=".495" stopColor={metal.hi} /><stop offset=".505" stopColor={metal.dark} />
             <stop offset=".58" stopColor={metal.base} /><stop offset=".82" stopColor={metal.hi} /><stop offset="1" stopColor={metal.dark} />

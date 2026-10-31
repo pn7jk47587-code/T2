@@ -2,11 +2,11 @@
 export type FeelingColor = "gelb" | "gruen" | "blau" | "rot";
 export interface Feeling { id: string; name: string; desc: string; color: FeelingColor }
 
-export const FEELING_COLORS: { id: FeelingColor; name: string; hex: string; glow: string }[] = [
-  { id: "gelb", name: "Gelb", hex: "#d6a63e", glow: "#ffcf5a" },
-  { id: "gruen", name: "Grün", hex: "#4f9a6e", glow: "#6fe0a0" },
-  { id: "blau", name: "Blau", hex: "#5677c4", glow: "#86a8ff" },
-  { id: "rot", name: "Rot", hex: "#b8303f", glow: "#ff3048" },
+export const FEELING_COLORS: { id: FeelingColor; name: string; hex: string; glow: string; bubble: string; label: string }[] = [
+  { id: "rot", name: "Rot", hex: "#b8303f", glow: "#ff3048", bubble: "#e0505c", label: "Viel Energie, unangenehm" },
+  { id: "gelb", name: "Gelb", hex: "#d6a63e", glow: "#ffcf5a", bubble: "#ecc05a", label: "Viel Energie, angenehm" },
+  { id: "blau", name: "Blau", hex: "#5677c4", glow: "#86a8ff", bubble: "#6f90e0", label: "Wenig Energie, unangenehm" },
+  { id: "gruen", name: "Grün", hex: "#4f9a6e", glow: "#6fe0a0", bubble: "#62c48c", label: "Wenig Energie, angenehm" },
 ];
 
 const GELB = `absorbed|Vertieft|Ganz konzentriert und interessiert
