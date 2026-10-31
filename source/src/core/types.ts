@@ -67,6 +67,12 @@ export interface Reminder {
   subs?: { id: string; title: string; done: boolean }[];
   /** Eingabe wie getippt (für die Bearbeitung) */
   raw?: string;
+  /** Monatliche Wiederholung: gleicher Tag im Monat oder n-ter Wochentag */
+  repeat?: "monat-tag" | "monat-wochentag";
+  /** Gewünschter Monatstag bei „monat-tag“ (z. B. 31 bleibt 31, auch nach kürzeren Monaten) */
+  repeatDay?: number;
+  /** Folgetermin, der beim Abhaken entstanden ist */
+  nextId?: string;
   /** Fristablauf, YYYY-MM-DD */
   frist?: string;
   /** Vorfrist, YYYY-MM-DD */

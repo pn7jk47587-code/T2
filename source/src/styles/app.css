@@ -532,3 +532,4 @@ input, textarea { font: inherit; color: inherit; }
 .bf-add-btn { font-size: 14px; font-weight: 700; color: var(--burgund-hell); padding: 0 6px; }
 .bf-blitze svg { color: #ecc05a; }
 .bf-note { width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.er-repeat { color: var(--silber, #dfe3e6); opacity: .8; }

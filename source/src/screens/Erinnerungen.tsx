@@ -32,6 +32,27 @@ const short = (iso: string) => new Date(iso + "T12:00:00").toLocaleDateString("d
 const addDays = (d: string, n: number) => { const x = new Date(d + "T12:00:00"); x.setDate(x.getDate() + n); return iso(x); };
 const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
+const WOCHENTAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+/** n-ter Wochentag eines Datums (5 = letzter) */
+const nth = (d: string) => { const x = new Date(d + "T12:00:00"); const n = Math.ceil(x.getDate() / 7); return { n, wd: x.getDay() }; };
+const repeatLabel = (kind: Reminder["repeat"], d: string) => {
+  if (!kind) return "Nie";
+  const x = new Date(d + "T12:00:00");
+  if (kind === "monat-tag") return `Monatlich am ${x.getDate()}.`;
+  const { n, wd } = nth(d);
+  return `Monatlich am ${n >= 5 ? "letzten" : n + "."} ${WOCHENTAGE[wd]}`;
+};
+/** Nächster Termin einen Monat später */
+function nextMonth(d: string, kind: NonNullable<Reminder["repeat"]>, anchorDay?: number) {
+  const x = new Date(d + "T12:00:00");
+  const y = x.getFullYear(), m = x.getMonth() + 1;
+  const last = new Date(y, m + 1, 0).getDate();
+  if (kind === "monat-tag") return iso(new Date(y, m, Math.min(anchorDay ?? x.getDate(), last), 12));
+  const { n, wd } = nth(d);
+  if (n >= 5) { const t = new Date(y, m, last, 12); while (t.getDay() !== wd) t.setDate(t.getDate() - 1); return iso(t); }
+  const t = new Date(y, m, 1, 12); while (t.getDay() !== wd) t.setDate(t.getDate() + 1); t.setDate(t.getDate() + (n - 1) * 7); return iso(t);
+}
+
 const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
 const two = (n: number) => String(n).padStart(2, "0");
 const local = (d: Date) => `${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}T${two(d.getHours())}${two(d.getMinutes())}00`;
@@ -63,6 +84,8 @@ function exportIcs(r: Reminder) {
     ...(r.vorfrist ? fristEvent(r, "Vorfrist", r.vorfrist) : []),
     ...(r.date ? ["BEGIN:VEVENT", `UID:${r.id}@app`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`, ...when,
     `SUMMARY:${esc(r.title)}`,
+    r.repeat === "monat-tag" ? `RRULE:FREQ=MONTHLY;BYMONTHDAY=${r.repeatDay ?? Number(r.date.slice(8))}` : "",
+    r.repeat === "monat-wochentag" ? `RRULE:FREQ=MONTHLY;BYDAY=${nth(r.date).n >= 5 ? -1 : nth(r.date).n}${["SU", "MO", "TU", "WE", "TH", "FR", "SA"][nth(r.date).wd]}` : "",
     r.notes ? `DESCRIPTION:${esc(r.notes)}` : "",
     r.url ? `URL:${r.url}` : "",
     r.category ? `CATEGORIES:${esc(r.category)}` : "",
@@ -168,18 +191,35 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         subs = parts.map((t) => draft.subs?.find((o) => o.title === t) ?? { id: crypto.randomUUID(), title: t, done: false });
       }
     }
-    const clean: Reminder = { ...draft, title, subs, raw: subs ? input : undefined, category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined, vorfrist: draft.frist ? draft.vorfrist : undefined };
+    const clean: Reminder = { ...draft, title, subs, raw: subs ? input : undefined, category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined, repeat: draft.date ? draft.repeat : undefined, vorfrist: draft.frist ? draft.vorfrist : undefined };
     setItems((p) => (isNew ? [clean, ...p] : p.map((r) => (r.id === clean.id ? clean : r))));
     setDraft(null);
   }
-  const toggle = (id: string) => setItems((p) => p.map((r) => (r.id === id ? { ...r, done: !r.done, doneAt: r.done ? undefined : Date.now(), subs: r.subs?.map((x) => ({ ...x, done: !r.done })) } : r)));
+  /** Wiederkehrende Erinnerung: beim Abhaken entsteht der Termin für den nächsten Monat */
+  const successor = (r: Reminder): Reminder | null => {
+    if (!r.repeat || !r.date) return null;
+    const date = nextMonth(r.date, r.repeat, r.repeatDay);
+    const shift = (v?: string) => (v ? iso(new Date(new Date(v + "T12:00:00").getTime() + (new Date(date + "T12:00:00").getTime() - new Date(r.date + "T12:00:00").getTime()))) : undefined);
+    return { ...r, id: crypto.randomUUID(), date, frist: shift(r.frist), vorfrist: shift(r.vorfrist), done: false, doneAt: undefined, createdAt: Date.now(), subs: r.subs?.map((x) => ({ ...x, id: crypto.randomUUID(), done: false })) };
+  };
+  const finish = (list: Reminder[], r: Reminder, done: boolean): Reminder[] => {
+    const upd = list.map((x) => (x.id === r.id ? { ...x, done, doneAt: done ? Date.now() : undefined, subs: x.subs?.map((s) => (done ? { ...s, done: true } : s)) } : x));
+    if (done && !r.done) {
+      const nx = successor(r);
+      if (nx) return [nx, ...upd.map((x) => (x.id === r.id ? { ...x, repeat: undefined, nextId: nx.id } : x))];
+    }
+    if (!done && r.nextId) return upd.filter((x) => x.id !== r.nextId).map((x) => (x.id === r.id ? { ...x, repeat: list.find((y) => y.id === r.nextId)?.repeat ?? r.repeat, nextId: undefined } : x));
+    return upd;
+  };
+  const toggle = (id: string) => setItems((p) => { const r = p.find((x) => x.id === id); return r ? finish(p, r, !r.done) : p; });
   /** Unterpunkt abhaken; sind alle erledigt, ist der Eintrag erledigt */
-  const toggleSub = (id: string, sid: string) => setItems((p) => p.map((r) => {
-    if (r.id !== id || !r.subs) return r;
-    const subs = r.subs.map((x) => (x.id === sid ? { ...x, done: !x.done } : x));
-    const all = subs.every((x) => x.done);
-    return { ...r, subs, done: all, doneAt: all ? Date.now() : undefined };
-  }));
+  const toggleSub = (id: string, sid: string) => setItems((p) => {
+    const mapped = p.map((r) => (r.id === id && r.subs ? { ...r, subs: r.subs.map((x) => (x.id === sid ? { ...x, done: !x.done } : x)) } : r));
+    const r = mapped.find((x) => x.id === id);
+    if (!r?.subs) return mapped;
+    const all = r.subs.every((x) => x.done);
+    return all !== r.done ? finish(mapped, r, all) : mapped;
+  });
   const remove = (id: string) => { setItems((p) => p.filter((r) => r.id !== id)); setDraft(null); };
   const d = draft;
   const upd = (p: Partial<Reminder>) => setDraft((x) => (x ? { ...x, ...p } : x));
@@ -196,6 +236,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
           {(r.date || r.frist || (view?.kind === "smart" && r.category)) && (
             <div className="s">
               {r.date && <span className={late ? "er-late" : ""}>{fmtDate(r)}</span>}
+              {r.repeat && r.date && <span className="er-repeat">{repeatLabel(r.repeat, r.date).replace("Monatlich am", "monatl.")}</span>}
               {r.vorfrist && <span className={"er-vf" + (!r.done && r.vorfrist <= today ? " due" : "")}>VF {short(r.vorfrist)}</span>}
               {r.frist && <span className={"er-frist" + (!r.done && r.frist <= today ? " due" : "")}>Frist {short(r.frist)}</span>}
               {view?.kind === "smart" && r.category && <span>{r.category}</span>}
@@ -392,7 +433,22 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
                 <span className="sheet-name">Datum{d.date && <small>{fmtDate({ ...d, time: undefined })}</small>}</span>
                 <Toggle on={!!d.date} onChange={(v) => upd({ date: v ? today : undefined, time: v ? d.time : undefined })} />
               </div>
-              {d.date && <div className="sheet-sub"><input className="sheet-in" type="date" value={d.date} onChange={(e) => upd({ date: e.target.value || today })} /></div>}
+              {d.date && <div className="sheet-sub"><input className="sheet-in" type="date" value={d.date} onChange={(e) => { const v = e.target.value || today; upd({ date: v, repeatDay: d.repeat === "monat-tag" ? Number(v.slice(8)) : undefined }); }} /></div>}
+              {d.date && (
+                <label className="sheet-row">
+                  <span className="sheet-ic"><Icon name="zyklus" /></span>
+                  <span className="sheet-name">Wiederholen</span>
+                  <select className="sheet-select" value={d.repeat ?? ""} onChange={(e) => {
+                    const v = (e.target.value || undefined) as Reminder["repeat"];
+                    upd({ repeat: v, repeatDay: v === "monat-tag" ? Number(d.date!.slice(8)) : undefined });
+                  }}>
+                    <option value="">Nie</option>
+                    <option value="monat-tag">{repeatLabel("monat-tag", d.date)}</option>
+                    <option value="monat-wochentag">{repeatLabel("monat-wochentag", d.date)}</option>
+                  </select>
+                  <Icon name="rechts" />
+                </label>
+              )}
               <div className="sheet-row">
                 <span className="sheet-ic"><Icon name="erinnerungen" /></span>
                 <span className="sheet-name">Uhrzeit{d.time && <small>{d.time}</small>}</span>
