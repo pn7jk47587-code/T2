@@ -85,6 +85,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "flickwerk",
+    title: "Flickwerk",
+    icon: "flickwerk",
+    a: "var(--umber)",
+    b: "var(--clay)",
+    feeds: [],
+  },
+  {
     id: "einstellungen",
     title: "Einstellungen",
     icon: "einstellungen",
