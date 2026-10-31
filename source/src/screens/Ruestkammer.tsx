@@ -1,3 +1,4 @@
+import { colorById, dominantColor, type FeelingLog } from "../core/feelings";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -14,7 +15,7 @@ import { ICONS } from "../core/icons";
 import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
-import { cycleDay, useOverviewValues } from "../core/overview";
+import { cycleDay, todayISO, useOverviewValues } from "../core/overview";
 import type { CycleLog, Reminder } from "../core/types";
 import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
 import type { Arms } from "../core/types";
@@ -60,19 +61,23 @@ function radialTexture() {
 }
 
 /** Symbol als rot leuchtende Rune auf transparentem Grund. */
-function runeTexture(id: string) {
+/** Rune in der Farbe des vorherrschenden Gefühls; ohne Auswahl weiß */
+function runeTexture(id: string, hex: string | null) {
+  const base = new THREE.Color(hex ?? "#f4f6f8");
+  const css = (c: THREE.Color, a = 1) => `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},${a})`;
+  const glow = css(base), mid = css(base.clone().multiplyScalar(0.8), 0.55), core = css(base.clone().lerp(new THREE.Color("#ffffff"), 0.75));
   const c = document.createElement("canvas"); c.width = c.height = 512;
   const g = c.getContext("2d")!;
   g.lineCap = "round"; g.lineJoin = "round";
   const draw = (w: number, col: string, blur: number) => {
     g.save(); g.translate(64, 64); g.scale(384 / 24, 384 / 24);
-    g.shadowColor = "#ff1030"; g.shadowBlur = blur; g.strokeStyle = col; g.lineWidth = w;
+    g.shadowColor = glow; g.shadowBlur = blur; g.strokeStyle = col; g.lineWidth = w;
     for (const d of ICONS[id] ?? []) g.stroke(new Path2D(d));
     g.restore();
   };
-  draw(2.6, "rgba(200,10,40,.55)", 40);
-  draw(1.5, "#ff3048", 18);
-  draw(0.7, "#ffd0d6", 4);
+  draw(2.6, mid, 40);
+  draw(1.5, glow, 18);
+  draw(0.7, core, 4);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   return t;
 }
@@ -131,6 +136,10 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   })();
   const linesKey = lines.join("\n");
   const goRef = useRef(go);
+  const [feel] = useStored<FeelingLog>("gefuehle", {});
+  const dom = dominantColor(feel[todayISO()]);
+  const runeHex = useRef<string | null>(null);
+  runeHex.current = dom ? colorById(dom).glow : null;
   goRef.current = go;
 
   useEffect(() => {
@@ -273,7 +282,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       helper.position.copy(hit.point); helper.lookAt(hit.point.clone().add(n));
       const size = Math.min(0.16, Math.max(0.07, Math.max(s.x, s.y) * 0.26));
       const mod = PARTS.find((p) => p.id === id)!.module;
-      const mat = new THREE.MeshBasicMaterial({ map: runeTexture(mod), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, blending: THREE.AdditiveBlending, toneMapped: false });
+      const mat = new THREE.MeshBasicMaterial({ map: runeTexture(mod, runeHex.current), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, blending: THREE.AdditiveBlending, toneMapped: false });
       const group = new THREE.Group();
       for (const m of meshes) {
         const geo = new DecalGeometry(m, hit.point, helper.rotation, new THREE.Vector3(size, size, size * 1.6));
