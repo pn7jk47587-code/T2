@@ -63,6 +63,10 @@ export interface Reminder {
   notes?: string;
   url?: string;
   urgent?: boolean;
+  /** Unterpunkte, entstehen aus Kommas im Titel */
+  subs?: { id: string; title: string; done: boolean }[];
+  /** Eingabe wie getippt (für die Bearbeitung) */
+  raw?: string;
   /** Fristablauf, YYYY-MM-DD */
   frist?: string;
   /** Vorfrist, YYYY-MM-DD */

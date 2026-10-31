@@ -131,11 +131,30 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
     if (!draft || !draft.title.trim()) return;
     let cat = draft.category;
     if (cat === NEW) { cat = newList.trim(); if (cat && !lists.includes(cat)) setLists((p) => [...p, cat]); }
-    const clean: Reminder = { ...draft, title: draft.title.trim(), category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined, vorfrist: draft.frist ? draft.vorfrist : undefined };
+    // Kommas trennen Unterpunkte; „Titel: a, b, c“ nimmt den Teil vor dem Doppelpunkt als Titel
+    const input = draft.title.trim();
+    let title = input, subs: Reminder["subs"];
+    if (input.includes(",")) {
+      const colon = input.indexOf(":");
+      const head = colon > 0 ? input.slice(0, colon).trim() : "";
+      const parts = (colon > 0 ? input.slice(colon + 1) : input).split(",").map((x) => x.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        title = head || input;
+        subs = parts.map((t) => draft.subs?.find((o) => o.title === t) ?? { id: crypto.randomUUID(), title: t, done: false });
+      }
+    }
+    const clean: Reminder = { ...draft, title, subs, raw: subs ? input : undefined, category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined, vorfrist: draft.frist ? draft.vorfrist : undefined };
     setItems((p) => (isNew ? [clean, ...p] : p.map((r) => (r.id === clean.id ? clean : r))));
     setDraft(null);
   }
-  const toggle = (id: string) => setItems((p) => p.map((r) => (r.id === id ? { ...r, done: !r.done, doneAt: r.done ? undefined : Date.now() } : r)));
+  const toggle = (id: string) => setItems((p) => p.map((r) => (r.id === id ? { ...r, done: !r.done, doneAt: r.done ? undefined : Date.now(), subs: r.subs?.map((x) => ({ ...x, done: !r.done })) } : r)));
+  /** Unterpunkt abhaken; sind alle erledigt, ist der Eintrag erledigt */
+  const toggleSub = (id: string, sid: string) => setItems((p) => p.map((r) => {
+    if (r.id !== id || !r.subs) return r;
+    const subs = r.subs.map((x) => (x.id === sid ? { ...x, done: !x.done } : x));
+    const all = subs.every((x) => x.done);
+    return { ...r, subs, done: all, doneAt: all ? Date.now() : undefined };
+  }));
   const remove = (id: string) => { setItems((p) => p.filter((r) => r.id !== id)); setDraft(null); };
   const d = draft;
   const upd = (p: Partial<Reminder>) => setDraft((x) => (x ? { ...x, ...p } : x));
@@ -145,7 +164,8 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
     return (
       <div className={"er-row" + (r.done ? " done" : "")}>
         <ShieldCheck done={r.done} arms={arms} onClick={() => toggle(r.id)} />
-        <button className="er-text" onClick={() => { setDraft({ ...r }); setIsNew(false); setNewList(""); }}>
+        <div className="er-main">
+        <button className="er-text" onClick={() => { setDraft({ ...r, title: r.raw ?? r.title }); setIsNew(false); setNewList(""); }}>
           <div className="t">{r.urgent && <span className="er-urgent">!</span>}{r.title}</div>
           {r.notes && <div className="er-notes">{r.notes}</div>}
           {(r.date || r.frist || (view?.kind === "smart" && r.category)) && (
@@ -154,9 +174,21 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
               {r.vorfrist && <span className={"er-vf" + (!r.done && r.vorfrist <= today ? " due" : "")}>VF {short(r.vorfrist)}</span>}
               {r.frist && <span className={"er-frist" + (!r.done && r.frist <= today ? " due" : "")}>Frist {short(r.frist)}</span>}
               {view?.kind === "smart" && r.category && <span>{r.category}</span>}
+              {r.subs && <span>{r.subs.filter((x) => x.done).length}/{r.subs.length}</span>}
             </div>
           )}
         </button>
+        {r.subs && (
+          <div className="er-subs">
+            {r.subs.map((x) => (
+              <div key={x.id} className={"er-sub" + (x.done ? " done" : "")}>
+                <ShieldCheck done={x.done} arms={arms} onClick={() => toggleSub(r.id, x.id)} />
+                <span>{x.title}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        </div>
         {(r.date || r.frist) && !r.done && <button className="icon-btn" onClick={() => exportIcs(r)} aria-label="Zum Kalender hinzufügen"><Icon name="kalender" /></button>}
       </div>
     );
