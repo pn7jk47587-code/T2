@@ -463,3 +463,25 @@ input, textarea { font: inherit; color: inherit; }
 .er-sub { display: flex; align-items: center; gap: 10px; font-size: 15px; }
 .er-sub .sc { width: 18px; height: 22px; }
 .er-sub.done span { color: var(--text-faint); text-decoration: line-through; }
+/* Kompakter Wappengestalter */
+.am { display: flex; flex-direction: column; gap: 10px; padding: 10px 0 4px; }
+.am-top { display: flex; align-items: center; gap: 12px; }
+.am-preview { width: 58px; height: 70px; flex: 0 0 auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
+.am-tabs { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: rgba(255,255,255,.05); border-radius: 999px; padding: 3px; }
+.am-tab { padding: 7px 0; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--text-dim); }
+.am-tab.on { color: #111; background: linear-gradient(170deg, #f6f7f9, #9aa1a8 45%, #e2e5e8 55%, #8a9097); }
+.am-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
+.am-row::-webkit-scrollbar { display: none; }
+.am-opt { flex: 0 0 auto; width: 48px; height: 56px; padding: 4px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.am-opt svg { width: 100%; height: 100%; }
+.am-opt.on { border-color: var(--burgund-hell); box-shadow: 0 0 0 1px var(--burgund-hell); background: rgba(179,36,59,.15); }
+.am-colors { display: flex; flex-direction: column; gap: 8px; }
+.am-sw-row { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 8px; }
+.am-sw-row small { font-size: 12px; color: var(--text-dim); }
+.am-sws { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 3px; }
+.am-sws::-webkit-scrollbar { display: none; }
+.am-sw { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.18); }
+.am-sw.on { border-color: #fff; box-shadow: 0 0 0 2px var(--burgund-hell); }
+.er-addlist { display: block; margin: 10px 4px 0 auto; font-size: 14px; font-weight: 600; color: var(--burgund-hell); padding: 6px 4px; }
+.er-list-arms { width: 34px; height: 41px; flex: 0 0 auto; }
+.er-list-arms svg { width: 100%; height: 100%; }

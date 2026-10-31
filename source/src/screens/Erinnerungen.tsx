@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Icon } from "../components/Icon";
 import { FoldHead } from "../components/Fold";
 import { SortList } from "../components/SortList";
+import { ArmsMini } from "../components/ArmsMini";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Arms, Reminder } from "../core/types";
@@ -101,6 +102,26 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
   const [newList, setNewList] = useState("");
   const [showDone, setShowDone] = useState(false);
   const [listsOpen, setListsOpen] = useStored<boolean>("erinnerungListenOffen", true);
+  const [listArms, setListArms] = useStored<Record<string, Arms>>("erinnerungListenWappen", {});
+  const baseArms: Arms = { ...DEFAULT_ARMS, ...arms, charge: "keins" };
+  const armsOf = (l: string): Arms => listArms[l] ?? baseArms;
+  const [newArms, setNewArms] = useState<Arms | null>(null);
+  /** Listen-Sheet: neue Liste anlegen oder Wappen einer Liste ändern */
+  const [listSheet, setListSheet] = useState<{ name: string; orig?: string; arms: Arms } | null>(null);
+  function saveListSheet() {
+    if (!listSheet) return;
+    const name = listSheet.name.trim(); if (!name) return;
+    if (listSheet.orig && listSheet.orig !== name) {
+      setLists((p) => p.map((x) => (x === listSheet.orig ? name : x)));
+      setItems((p) => p.map((r) => (r.category === listSheet.orig ? { ...r, category: name } : r)));
+      setListArms((p) => { const o = { ...p }; delete o[listSheet.orig!]; o[name] = listSheet.arms; return o; });
+      if (view?.kind === "list") setView({ kind: "list", name });
+    } else {
+      if (!lists.includes(name)) setLists((p) => [...p, name]);
+      setListArms((p) => ({ ...p, [name]: listSheet.arms }));
+    }
+    setListSheet(null);
+  }
   const today = todayISO();
 
   const allLists = useMemo(() => Array.from(new Set([...lists, ...items.map((i) => i.category).filter(Boolean)])), [lists, items]);
@@ -125,12 +146,16 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
     setDraft({ id: crypto.randomUUID(), title: "", category: cat, done: false, createdAt: Date.now(),
       date: view?.kind === "smart" && view.id === "heute" ? today : view?.kind === "kalender" ? calDay : undefined,
       frist: fr ? addDays(today, 14) : undefined, vorfrist: fr ? addDays(today, 7) : undefined });
-    setIsNew(true); setNewList("");
+    setIsNew(true); setNewList(""); setNewArms(null);
   }
   function save() {
     if (!draft || !draft.title.trim()) return;
     let cat = draft.category;
-    if (cat === NEW) { cat = newList.trim(); if (cat && !lists.includes(cat)) setLists((p) => [...p, cat]); }
+    if (cat === NEW) {
+      cat = newList.trim();
+      if (cat && !lists.includes(cat)) setLists((p) => [...p, cat]);
+      if (cat && newArms) setListArms((p) => ({ ...p, [cat]: newArms }));
+    }
     // Kommas trennen Unterpunkte; „Titel: a, b, c“ nimmt den Teil vor dem Doppelpunkt als Titel
     const input = draft.title.trim();
     let title = input, subs: Reminder["subs"];
@@ -222,13 +247,14 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
             <SortList className="er-group" items={allLists} keyOf={(l) => l} onReorder={setLists} onTap={(l) => setView({ kind: "list", name: l })}
               render={(l) => (
                 <div className="er-list-row" role="button">
-                  <span className="er-list-icon"><CoatOfArms arms={{ ...arms, charge: "keins" }} /></span>
+                  <span className="er-list-icon"><CoatOfArms arms={armsOf(l)} /></span>
                   <span className="er-list-name">{l}</span>
                   <span className="er-list-count">{items.filter((r) => r.category === l && !r.done).length}</span>
                   <Icon name="rechts" />
                 </div>
               )} />
           )}
+          {listsOpen && <button className="er-addlist" onClick={() => setListSheet({ name: "", arms: baseArms })}>+ Neue Liste</button>}
         </>
       )}
     </>
@@ -296,6 +322,11 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       <>
         <div className="topbar">
           <button className="back" onClick={() => setView(null)} aria-label="Zurück"><Icon name="back" /></button>
+          {view.kind === "list" && (
+            <button className="er-list-arms" onClick={() => setListSheet({ name: view.name, orig: view.name, arms: armsOf(view.name) })} aria-label="Liste bearbeiten">
+              <CoatOfArms arms={armsOf(view.name)} />
+            </button>
+          )}
           <h1>{title}</h1>
         </div>
         <div className="er-group">
@@ -322,6 +353,22 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         <button className="er-new" onClick={openNew}><span>+</span> Neue Erinnerung</button>
       )}
 
+      {listSheet && (
+        <div className="sheet-bg" onClick={() => setListSheet(null)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-head">
+              <button className="sheet-btn" onClick={() => setListSheet(null)} aria-label="Abbrechen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+              <span>{listSheet.orig ? "Liste" : "Neue Liste"}</span>
+              <button className={"sheet-btn ok" + (listSheet.name.trim() ? "" : " off")} onClick={saveListSheet} aria-label="Sichern"><Icon name="haken" /></button>
+            </div>
+            <div className="sheet-card">
+              <input className="sheet-in big" value={listSheet.name} onChange={(e) => setListSheet({ ...listSheet, name: e.target.value })} placeholder="Name der Liste" autoFocus={!listSheet.orig} />
+              <hr />
+              <ArmsMini arms={listSheet.arms} onChange={(a) => setListSheet({ ...listSheet, arms: a })} />
+            </div>
+          </div>
+        </div>
+      )}
       {d && (
         <div className="sheet-bg" onClick={() => setDraft(null)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -389,7 +436,12 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
                 </select>
                 <Icon name="rechts" />
               </label>
-              {d.category === NEW && <div className="sheet-sub"><input className="sheet-in" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="Name der Liste" /></div>}
+              {d.category === NEW && (
+                <div className="sheet-sub">
+                  <input className="sheet-in" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="Name der Liste" />
+                  <ArmsMini arms={newArms ?? baseArms} onChange={setNewArms} />
+                </div>
+              )}
             </div>
 
             {!isNew && <button className="sheet-del" onClick={() => remove(d.id)}>Erinnerung löschen</button>}
