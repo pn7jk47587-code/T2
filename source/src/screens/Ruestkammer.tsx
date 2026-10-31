@@ -1,4 +1,3 @@
-import logoUrl from "../assets-logo.png";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -31,7 +30,7 @@ interface PartDef { id: string; name: string; module: string }
 
 /** Ankerpunkte der Runen (Meter, Boden y=0). Bei Paaren wird die Seite gewählt, die zur Kamera zeigt. */
 const ANCHORS: Record<string, [number, number, number, boolean]> = {
-  helm: [0, 1.7, 0.05, false], brust: [0.09, 1.33, 0, false], ruecken: [0.08, 1.3, 0, false], fauld: [-0.12, 0.8, 0, false],
+  helm: [-0.016, 1.73, 0.07, false], brust: [0.09, 1.33, 0, false], ruecken: [0.08, 1.3, 0, false], fauld: [-0.12, 0.8, 0, false],
   schulter: [0.25, 1.42, 0, true], arm: [0.27, 1.12, 0, true], hand: [0.27, 0.9, 0, true], bein: [0.11, 0.42, 0, true], schuh: [0.12, 0.07, 0.08, true],
 };
 
@@ -232,7 +231,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     const ro = new ResizeObserver(size); ro.observe(el);
 
     /* Interaktion */
-    let focus: { c: THREE.Vector3; d: number; speed: number } | null = null;
+    let focus: { c: THREE.Vector3; d: number; speed: number; dir?: THREE.Vector3 } | null = null;
     let selected: string | null = null;
     let selT = 0;
     let busy = false;
@@ -260,9 +259,9 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       const [ax, ay, az, pair] = ANCHORS[id] ?? [0, 1, 0, false];
       const x = pair ? Math.sign(camera.position.x || 1) * Math.abs(ax) : ax;
       const anchor = new THREE.Vector3(x, ay, az);
-      // Helm: Rune immer vorne mittig (Vorderseite der Rüstung zeigt nach +z)
+      // Helm: Rune immer auf der glatten linken Helmseite (Rüstung blickt nach +z, ihre linke Seite liegt bei +x)
       const front = id === "helm";
-      const from = front ? anchor.clone().add(new THREE.Vector3(0, 0, 3)) : camera.position.clone();
+      const from = front ? anchor.clone().add(new THREE.Vector3(3, 0, 0)) : camera.position.clone();
       const r2 = new THREE.Raycaster(from, anchor.clone().sub(from).normalize());
       const hit = r2.intersectObjects(meshes, false)[0] ?? at;
       if (!hit || !hit.face) return;
@@ -291,7 +290,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       if (!id) { outline.selectedObjects = []; focus = { c: home.clone(), d: 5.6, speed: 0.07 }; return; }
       outline.selectedObjects = byPart.get(id) ?? [];
       const { c, s } = centerOf(id);
-      focus = { c, d: Math.min(5, Math.max(1.1, Math.max(s.x, s.y) * 2.6 + 0.4)), speed: 0.08 };
+      focus = { c, d: Math.min(5, Math.max(1.1, Math.max(s.x, s.y) * 2.6 + 0.4)), speed: 0.08, dir: id === "helm" ? new THREE.Vector3(0.85, 0.12, 0.5).normalize() : undefined };
     };
     api.current.open = () => {
       if (!selected || busy) return;
@@ -351,7 +350,8 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       if (focus) {
         controls.target.lerp(focus.c, focus.speed);
         dir.copy(camera.position).sub(controls.target).normalize();
-        camera.position.lerp(tmp.copy(focus.c).addScaledVector(dir, focus.d), focus.speed);
+        if (focus.dir) dir.lerp(focus.dir, 0.35).normalize();
+        camera.position.lerp(tmp.copy(focus.c).addScaledVector(dir, focus.d), focus.dir ? 0.15 : focus.speed);
       }
       controls.update();
       if (selected) {
@@ -393,7 +393,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     <>
       <div className="rk" data-skin={skin.id}>
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
-        <img className={"rk-logo" + (sel ? " hide" : "")} src={logoUrl} alt="" aria-hidden="true" />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
             <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Einstellungen"><CoatOfArms arms={arms} /></button>

@@ -14,6 +14,28 @@ export const TINCTURES: { id: string; name: string; hex: string }[] = [
   { id: "stahl", name: "Stahl", hex: "#7a8189" },
   { id: "schwarz", name: "Schwarz", hex: "#141416" },
 ];
+/** Metalle für das Wappenbild: dunkel, Grundton, Glanz */
+export const METALS: { id: string; name: string; dark: string; base: string; hi: string }[] = [
+  { id: "m-silber", name: "Silber", dark: "#6f767d", base: "#c3c8cd", hi: "#ffffff" },
+  { id: "m-gold", name: "Gold", dark: "#7a5410", base: "#d4a63a", hi: "#fff1b8" },
+  { id: "m-bronze", name: "Bronze", dark: "#5a3216", base: "#b0723c", hi: "#f5c79a" },
+  { id: "m-messing", name: "Messing", dark: "#6b5a1c", base: "#c2a654", hi: "#f6ecb0" },
+];
+export const getMetal = (id: string) => METALS.find((m) => m.id === id);
+
+/** Lichtachse je Teilung: der Glanz bricht sich an der Teilungslinie (Koordinaten im Raster 100 x 120). */
+const LIGHT: Record<string, [number, number, number, number][]> = {
+  geteilt: [[50, 0, 50, 120]],
+  gespalten: [[0, 60, 100, 60]],
+  "geteilt-oben-gespalten": [[50, 0, 50, 120]],
+  "gespalten-hinten-geteilt": [[0, 60, 100, 60]],
+  geviert: [[0, 60, 100, 60], [50, 0, 50, 120]],
+  "geviert-herzschild": [[0, 60, 100, 60], [50, 0, 50, 120]],
+  schraegrechts: [[73, 41, 27, 79]],
+  schraeglinks: [[27, 41, 73, 79]],
+  einfarbig: [[20, 10, 80, 110]],
+};
+
 export const tincture = (id: string) => TINCTURES.find((t) => t.id === id)?.hex ?? id;
 
 
@@ -54,6 +76,8 @@ export function CoatOfArms({ arms, className, style }: { arms: Arms; className?:
   const sh = getShield(arms.shape);
   const div = arms.division === "einfarbig" ? null : DIVISIONS.find((d) => d.id === arms.division) ?? DIVISIONS[0];
   const ch = CHARGES.find((c) => c.id === arms.charge) ?? CHARGES[1];
+  const metal = getMetal(arms.cc);
+  const light = LIGHT[div?.id ?? "einfarbig"] ?? LIGHT.einfarbig;
   return (
     <svg viewBox="0 0 100 120" className={className} style={style} aria-hidden="true">
       <defs>
@@ -62,13 +86,23 @@ export function CoatOfArms({ arms, className, style }: { arms: Arms; className?:
           <stop offset="0" stopColor="#fff" stopOpacity=".38" /><stop offset=".45" stopColor="#fff" stopOpacity="0" />
           <stop offset=".75" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".3" />
         </linearGradient>
+        {metal && light.map(([x1, y1, x2, y2], i) => (
+          /* Facettenkante an der Teilungslinie: hell davor, abrupt dunkler danach, dann wieder Glanz */
+          <linearGradient key={i} id={`${id}m${i}`} gradientUnits="userSpaceOnUse" x1={x1} y1={y1} x2={x2} y2={y2}>
+            <stop offset="0" stopColor={metal.dark} /><stop offset=".38" stopColor={metal.base} />
+            <stop offset=".495" stopColor={metal.hi} /><stop offset=".505" stopColor={metal.dark} />
+            <stop offset=".58" stopColor={metal.base} /><stop offset=".82" stopColor={metal.hi} /><stop offset="1" stopColor={metal.dark} />
+          </linearGradient>
+        ))}
       </defs>
       <g clipPath={`url(#${id}c)`}>
         <rect x="0" y="0" width="100" height="120" fill={tincture(arms.c1)} />
         {div?.draw([tincture(arms.c2), tincture(arms.c3 ?? "schwarz")], sh.d)}
-        {ch.d && (
+        {ch.d && (metal ? light.map((_, i) => (
+          <path key={i} d={ch.d} fill={`url(#${id}m${i})`} fillRule="evenodd" transform="translate(18 24) scale(2.67)" opacity={i ? 0.5 : 1} />
+        )) : (
           <path d={ch.d} fill={tincture(arms.cc)} fillRule="evenodd" transform="translate(18 24) scale(2.67)" />
-        )}
+        ))}
         <rect x="0" y="0" width="100" height="120" fill={`url(#${id}g)`} />
       </g>
       <path d={sh.d} fill="none" stroke={tincture(arms.bc ?? "silber")} strokeWidth="3" />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "../components/Icon";
 import { useStored } from "../core/db";
-import { CHARGES, CoatOfArms, DEFAULT_ARMS, DIVISIONS, TINCTURES } from "../core/heraldry";
+import { CHARGES, CoatOfArms, DEFAULT_ARMS, DIVISIONS, METALS, TINCTURES } from "../core/heraldry";
 import { SHIELDS } from "../core/shields";
 import type { Arms } from "../core/types";
 
@@ -92,6 +92,14 @@ export function Wappen({ back }: { back: () => void }) {
           {a.charge !== "keins" && (
             <>
               <div className="section eyebrow">Symbol</div>
+              <div className="wp-sws metals">
+                {METALS.map((m) => (
+                  <button key={m.id} type="button" className={"wp-sw wp-metal" + (a.cc === m.id ? " on" : "")} aria-label={m.name} title={m.name} onClick={() => set({ cc: m.id })}
+                    style={{ background: `linear-gradient(135deg, ${m.dark} 0%, ${m.base} 30%, ${m.hi} 49%, ${m.dark} 51%, ${m.base} 65%, ${m.hi} 82%, ${m.dark} 100%)` }}>
+                    <small>{m.name}</small>
+                  </button>
+                ))}
+              </div>
               <Swatches value={a.cc} onPick={(cc) => set({ cc })} />
             </>
           )}

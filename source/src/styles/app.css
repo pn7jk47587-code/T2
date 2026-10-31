@@ -383,3 +383,7 @@ input, textarea { font: inherit; color: inherit; }
 .er-cal-frist .er-cal-tag { color: #f1c3cb; }
 .rk-logo { position: absolute; right: 12px; top: calc(var(--safe-top) + 8px); width: 52px; height: 52px; pointer-events: none; transition: opacity .3s; z-index: 2; }
 .rk-logo.hide { opacity: 0; }
+.wp-sws.metals { margin-bottom: 10px; gap: 14px; }
+.wp-metal { position: relative; width: 46px; height: 46px; }
+.wp-metal small { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 4px; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.wp-sws.metals { padding-bottom: 18px; }
