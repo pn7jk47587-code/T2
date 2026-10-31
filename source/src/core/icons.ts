@@ -29,6 +29,7 @@ export const ICONS: Record<string, string[]> = {
 };
 
 export const UI_ICONS: Record<string, string[]> = {
+  helm: ["M6 20.5v-7.2a6 6 0 0 1 12 0v7.2Z", "M7.5 13.2h9", "M12 7.3V3.5", "M9.5 16.5h1M13.5 16.5h1"],
   blitz: ["M13.5 2.5 6.5 13h5l-1 8.5 7-10.5h-5Z"],
   /** Mittelalterliche Manicula: Hand mit Manschette, Zeigefinger nach rechts */
   manicule: ["M1.8 7.6h2.9v9.6H1.8z", "M1.8 9.2h2.9M1.8 15.6h2.9M3.25 7.6v9.6", "M4.7 8.6c1.6-.9 3.4-1.4 5.3-1.2l1.6.5h9.4c1 0 1 1.7 0 1.7h-8.2", "M19.7 8.1v1.7", "M12.8 9.6c1.1.2 1.6.9 1.4 1.6-.1.5-.6.8-1.2.8", "M13 12c1 .2 1.4.9 1.2 1.6-.1.5-.6.8-1.2.8", "M13 14.4c.9.2 1.2.8 1 1.4-.1.5-.6.7-1.1.7H8.4c-1.4 0-2.6-.3-3.7-.9", "M8.6 10.4c.9.9 2.3 1.4 3.6 1.3"],

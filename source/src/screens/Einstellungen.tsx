@@ -1,9 +1,13 @@
 import { Shell } from "../components/Shell";
-import type { ModuleDef } from "../core/modules";
+import { getModule, type ModuleDef } from "../core/modules";
+import { Icon } from "../components/Icon";
 import { useStored } from "../core/db";
 import type { Profile } from "../core/types";
 import { defaultProfile } from "./Home";
 import { getSkin, useNav, useSkin } from "../core/skins";
+
+/** Schnellwahl: Reihenfolge Planung und Körper, dann Haushalt, dann Rückblick */
+const QUICK = ["erinnerungen", "gefuehle", "zyklus", "befinden", "gewohnheiten", "finanzen", "fundorte", "flickwerk", "analytics", "archiv"];
 
 export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void }) {
   const [profile, setProfile] = useStored<Profile>("profile", defaultProfile);
@@ -13,6 +17,22 @@ export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void 
 
   return (
     <Shell mod={mod} back={back} emblem={false}>
+      <nav className="quick" aria-label="Schnellwahl">
+        {QUICK.map((id) => {
+          const m = getModule(id); if (!m) return null;
+          return (
+            <button key={id} className="quick-item" onClick={() => nav(id)}>
+              <span className="quick-ic"><Icon name={m.icon} /></span>
+              <small>{m.title}</small>
+            </button>
+          );
+        })}
+        <button className="quick-item" onClick={() => nav("ruestkammer")}>
+          <span className="quick-ic"><Icon name="helm" /></span>
+          <small>Rüstkammer</small>
+        </button>
+      </nav>
+
       <div className="section eyebrow">Profil</div>
       <div className="card" style={{ padding: 16 }}>
         <div className="field">
