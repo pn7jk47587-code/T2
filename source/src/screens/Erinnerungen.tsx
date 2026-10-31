@@ -98,6 +98,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
   const [isNew, setIsNew] = useState(false);
   const [newList, setNewList] = useState("");
   const [showDone, setShowDone] = useState(false);
+  const [listsOpen, setListsOpen] = useStored<boolean>("erinnerungListenOffen", true);
   const today = todayISO();
 
   const allLists = useMemo(() => Array.from(new Set([...lists, ...items.map((i) => i.category).filter(Boolean)])), [lists, items]);
@@ -182,8 +183,8 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       </div>
       {allLists.length > 0 && (
         <>
-          <div className="section eyebrow">Meine Listen</div>
-          <div className="er-group">
+          <button className="section eyebrow er-done-toggle" onClick={() => setListsOpen(!listsOpen)} aria-expanded={listsOpen}>Meine Listen {listsOpen ? "▾" : "▸"}</button>
+          {listsOpen && <div className="er-group">
             {allLists.map((l) => (
               <button key={l} className="er-list-row" onClick={() => setView({ kind: "list", name: l })}>
                 <span className="er-list-icon"><CoatOfArms arms={{ ...arms, charge: "keins" }} /></span>
@@ -192,7 +193,7 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
                 <Icon name="rechts" />
               </button>
             ))}
-          </div>
+          </div>}
         </>
       )}
     </>

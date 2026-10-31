@@ -259,14 +259,17 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       const [ax, ay, az, pair] = ANCHORS[id] ?? [0, 1, 0, false];
       const x = pair ? Math.sign(camera.position.x || 1) * Math.abs(ax) : ax;
       const anchor = new THREE.Vector3(x, ay, az);
-      const r2 = new THREE.Raycaster(camera.position.clone(), anchor.clone().sub(camera.position).normalize());
+      // Helm: Rune immer vorne mittig (Vorderseite der Rüstung zeigt nach +z)
+      const front = id === "helm";
+      const from = front ? anchor.clone().add(new THREE.Vector3(0, 0, 3)) : camera.position.clone();
+      const r2 = new THREE.Raycaster(from, anchor.clone().sub(from).normalize());
       const hit = r2.intersectObjects(meshes, false)[0] ?? at;
       if (!hit || !hit.face) return;
       const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
-      if (n.dot(camera.position.clone().sub(hit.point)) < 0) n.negate();
-      // Projektion leicht zur Kamera geneigt, damit die Rune auf gewölbten Platten lesbar bleibt
-      const view = camera.position.clone().sub(hit.point).normalize();
-      n.lerp(view, 0.35).normalize();
+      if (n.dot(from.clone().sub(hit.point)) < 0) n.negate();
+      // Projektion leicht zur Blickrichtung geneigt, damit die Rune auf gewölbten Platten lesbar bleibt
+      const view = from.clone().sub(hit.point).normalize();
+      n.lerp(view, front ? 0.7 : 0.35).normalize();
       helper.position.copy(hit.point); helper.lookAt(hit.point.clone().add(n));
       const size = Math.min(0.16, Math.max(0.07, Math.max(s.x, s.y) * 0.26));
       const mod = PARTS.find((p) => p.id === id)!.module;
