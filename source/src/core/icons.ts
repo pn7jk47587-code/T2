@@ -15,6 +15,8 @@ export const ICONS: Record<string, string[]> = {
   // Geldbeutel (Säckel)
   finanzen: ["M8.6 8c-3 2.2-4.6 5.1-4.6 8 0 3 2.4 4.5 8 4.5s8-1.5 8-4.5c0-2.9-1.6-5.8-4.6-8Z", "M8.2 8h7.6", "M9 8 7.4 4.3c1.6.6 3 .6 4.6-.3 1.6.9 3 .9 4.6.3L15 8", "M10 14.6a2 2 0 1 0 4 0a2 2 0 1 0-4 0Z"],
   // Schlüssel
+  /** Schwert über aufgeschlagenem Buch */
+  aufruesten: ["M3.5 14.8c3-.4 5.5 0 8.5 1.5 3-1.5 5.5-1.9 8.5-1.5v4.6c-3-.4-5.5 0-8.5 1.5-3-1.5-5.5-1.9-8.5-1.5Z", "M12 16.3v4.6", "M12 2.5v9.5", "M9.2 10.2h5.6", "M12 12v1.8"],
   /** Apothekerzeichen: Schale der Hygieia mit Schlange */
   befinden: ["M5.5 11h13c0 3.8-2.9 6.2-6.5 6.2S5.5 14.8 5.5 11Z", "M12 17.2v3.3M8.5 20.8h7", "M7.4 11C6 8.2 7 4.6 10.2 4.2c2.6-.3 3.6 1.8 5.6 1.6 1.4-.1 2.2-1.1 2.2-2.2", "M18 3.6c.9.3 1.3 1.2 1 2-.3.9-1.4 1.2-2.2.8", "M19.3 5.4l1.1.6"],
   /** Nadel mit Faden */
@@ -25,8 +27,8 @@ export const ICONS: Record<string, string[]> = {
   analytics: ["M12 2.8c3.4 0 5.8 2.6 5.8 5.9s-2.4 5.9-5.8 5.9-5.8-2.6-5.8-5.9 2.4-5.9 5.8-5.9Z", "M9.3 6.6c.6-1 1.6-1.6 2.7-1.7", "M10.8 15.4h2.4", "M12 15.4v5.4", "M10.4 21.1h3.2"],
   // Folio mit Schließe (Annalen)
   archiv: ["M5.5 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5h-11Z", "M8 3.5v17", "M5.5 7.5H8M5.5 16.5H8", "M18 10h-2.3v4H18", "M12.6 8v5.5M10.8 10h3.6"],
-  // Schmiedehammer
-  einstellungen: ["M10.6 8.4 15.3 3.7l4.9 4.9-4.7 4.7Z", "M12.9 10.7 4 19.6"],
+  // Urkunde mit Siegel (Erlasse)
+  einstellungen: ["M6.5 3.5h11v12.5h-11Z", "M6.5 3.5a1.6 1.6 0 0 0 0 3.2M17.5 3.5a1.6 1.6 0 0 1 0 3.2", "M9 7.5h6M9 10.5h6", "M10.6 17.4l-1.1 3.6 2.5-1.1 2.5 1.1-1.1-3.6", "M12 12.6a2.3 2.3 0 1 0 .01 0Z"],
 };
 
 export const UI_ICONS: Record<string, string[]> = {

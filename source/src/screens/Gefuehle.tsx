@@ -15,22 +15,41 @@ function dayPart() {
   return h < 11 ? "heute Morgen" : h < 14 ? "heute Mittag" : h < 18 ? "heute Nachmittag" : "heute Abend";
 }
 
-/** Feld aller Gefühle: Rot oben links, Gelb oben rechts, Blau unten links, Grün unten rechts; die Blöcke treffen sich in der Mitte. */
+/** Feld aller Gefühle ohne Lücken: ein gleichmäßiges Raster, das von den Ecken her nach Farbe aufgeteilt wird
+ *  (Rot oben links, Gelb oben rechts, Blau unten links, Grün unten rechts). */
 function buildField() {
-  const by = (c: FeelingColor) => FEELINGS.filter((f) => f.color === c);
-  const dims = (n: number) => { const cols = Math.ceil(Math.sqrt(n)); return { cols, rows: Math.ceil(n / cols) }; };
-  const R = dims(by("rot").length), Y = dims(by("gelb").length), B = dims(by("blau").length), G = dims(by("gruen").length);
-  const left = Math.max(R.cols, B.cols), top = Math.max(R.rows, Y.rows);
-  const cols = left + Math.max(Y.cols, G.cols), rows = top + Math.max(B.rows, G.rows);
-  const cells: { f: Feeling; x: number; y: number }[] = [];
-  const place = (list: Feeling[], d: { cols: number; rows: number }, right: boolean, bottom: boolean) => list.forEach((f, i) => {
-    const cx = i % d.cols, cy = Math.floor(i / d.cols);
-    const x = right ? left + cx : left - d.cols + cx;
-    const y = bottom ? top + cy : top - d.rows + cy;
-    cells.push({ f, x, y });
+  const total = FEELINGS.length;
+  const cols = Math.ceil(Math.sqrt(total));
+  const rows = Math.ceil(total / cols);
+  const lastCount = total - (rows - 1) * cols;
+  const slots: { x: number; y: number }[] = [];
+  for (let y = 0; y < rows; y++) {
+    const n = y === rows - 1 ? lastCount : cols;
+    const off = y === rows - 1 ? (cols - n) / 2 : 0;
+    for (let i = 0; i < n; i++) slots.push({ x: i + off, y });
+  }
+  const corner: Record<FeelingColor, [number, number]> = { rot: [-1, -1], gelb: [1, -1], blau: [-1, 1], gruen: [1, 1] };
+  const cap: Record<FeelingColor, number> = { rot: 0, gelb: 0, blau: 0, gruen: 0 };
+  FEELINGS.forEach((f) => cap[f.color]++);
+  const cx = (cols - 1) / 2, cy = (rows - 1) / 2;
+  // Gierige Zuordnung: jedes Feld geht an die Farbe, deren Ecke es am deutlichsten zugewandt ist
+  const pairs: { i: number; c: FeelingColor; score: number }[] = [];
+  slots.forEach((sl, i) => {
+    const nx = (sl.x - cx) / cx, ny = (sl.y - cy) / cy;
+    (Object.keys(corner) as FeelingColor[]).forEach((c) => pairs.push({ i, c, score: nx * corner[c][0] * cap[c] / 80 + ny * corner[c][1] * cap[c] / 80 + (nx * corner[c][0] + ny * corner[c][1]) }));
   });
-  place(by("rot"), R, false, false); place(by("gelb"), Y, true, false); place(by("blau"), B, false, true); place(by("gruen"), G, true, true);
-  return { cells, cols, rows, left, top };
+  pairs.sort((p, q) => q.score - p.score);
+  const owner: (FeelingColor | null)[] = slots.map(() => null);
+  const left = { ...cap };
+  for (const p of pairs) if (!owner[p.i] && left[p.c] > 0) { owner[p.i] = p.c; left[p.c]--; }
+  const cells: { f: Feeling; x: number; y: number }[] = [];
+  (Object.keys(corner) as FeelingColor[]).forEach((c) => {
+    const list = FEELINGS.filter((f) => f.color === c);
+    const mine = slots.map((sl, i) => ({ ...sl, i })).filter((sl) => owner[sl.i] === c).sort((p, q) => p.y - q.y || p.x - q.x);
+    list.forEach((f, k) => cells.push({ f, x: mine[k].x, y: mine[k].y }));
+  });
+  const left0 = cols / 2, top0 = rows / 2;
+  return { cells, cols, rows, left: left0, top: top0 };
 }
 
 const hex2 = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));

@@ -85,6 +85,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "aufruesten",
+    title: "Aufrüsten",
+    icon: "aufruesten",
+    a: "var(--clay)",
+    b: "var(--moss)",
+    feeds: [],
+  },
+  {
     id: "befinden",
     title: "Siechenbuch",
     icon: "befinden",
@@ -102,7 +110,7 @@ export const modules: ModuleDef[] = [
   },
   {
     id: "einstellungen",
-    title: "Einstellungen",
+    title: "Erlasse",
     icon: "einstellungen",
     a: "var(--moon)",
     b: "var(--teal)",

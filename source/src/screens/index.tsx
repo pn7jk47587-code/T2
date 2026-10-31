@@ -6,6 +6,7 @@ import { Zyklus } from "./Zyklus";
 import { Gefuehle } from "./Gefuehle";
 import { Flickwerk } from "./Flickwerk";
 import { Befinden } from "./Befinden";
+import { Aufruesten } from "./Aufruesten";
 
 type Screen = (props: { mod: ModuleDef; back: () => void }) => JSX.Element;
 
@@ -17,6 +18,7 @@ export const screens: Record<string, Screen> = {
   gefuehle: Gefuehle,
   flickwerk: Flickwerk,
   befinden: Befinden,
+  aufruesten: Aufruesten,
 };
 
 export const screenFor = (id: string): Screen => screens[id] ?? Stub;

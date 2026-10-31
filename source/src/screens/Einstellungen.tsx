@@ -7,7 +7,7 @@ import { defaultProfile } from "./Home";
 import { getSkin, useNav, useSkin } from "../core/skins";
 
 /** Schnellwahl: Reihenfolge Planung und Körper, dann Haushalt, dann Rückblick */
-const QUICK = ["erinnerungen", "gefuehle", "zyklus", "befinden", "gewohnheiten", "finanzen", "fundorte", "flickwerk", "analytics", "archiv"];
+const QUICK = ["erinnerungen", "aufruesten", "gefuehle", "zyklus", "befinden", "gewohnheiten", "finanzen", "fundorte", "flickwerk", "analytics", "archiv"];
 
 export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void }) {
   const [profile, setProfile] = useStored<Profile>("profile", defaultProfile);

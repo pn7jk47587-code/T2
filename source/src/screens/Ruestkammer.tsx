@@ -432,7 +432,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
-            <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Einstellungen"><CoatOfArms arms={arms} /></button>
+            <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Erlasse"><CoatOfArms arms={arms} /></button>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}
           </div>

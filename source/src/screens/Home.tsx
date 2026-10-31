@@ -40,7 +40,7 @@ export function Home({ go }: { go: (id: string) => void }) {
   return (
     <>
       <header className="profile">
-        <button className="arms-main" onClick={() => go("einstellungen")} aria-label="Einstellungen">
+        <button className="arms-main" onClick={() => go("einstellungen")} aria-label="Erlasse">
           <CoatOfArms arms={arms} />
         </button>
         <h1>{profile.name}</h1>

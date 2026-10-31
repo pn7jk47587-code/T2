@@ -20,7 +20,7 @@ const Ruestkammer = lazy(() => import("./screens/Ruestkammer").then((m) => ({ de
 function useRoute() {
   const read = () => {
     try {
-      return location.hash.replace(/^#\/?/, "");
+      return location.hash.replace(/^#\/?/, "").split("?")[0];
     } catch {
       return "";
     }
