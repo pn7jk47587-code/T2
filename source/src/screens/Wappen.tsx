@@ -23,6 +23,9 @@ export function Wappen({ back }: { back: () => void }) {
   const [step, setStep] = useState(0);
   const set = (p: Partial<Arms>) => setArms((a) => ({ ...a, ...p }));
   const a: Arms = { ...DEFAULT_ARMS, ...arms };
+  if (!DIVISIONS.some((d) => d.id === a.division)) a.division = DEFAULT_ARMS.division;
+  if (!CHARGES.some((c) => c.id === a.charge)) a.charge = DEFAULT_ARMS.charge;
+  const three = DIVISIONS.find((d) => d.id === a.division)?.colors === 3;
 
   return (
     <>
@@ -78,10 +81,12 @@ export function Wappen({ back }: { back: () => void }) {
         <div className="card" style={{ padding: "6px 14px 14px" }}>
           <div className="section eyebrow">Feld</div>
           <Swatches value={a.c1} onPick={(c1) => set({ c1 })} />
-          {a.division !== "einfarbig" && (
+          <div className="section eyebrow">Teilung</div>
+          <Swatches value={a.c2} onPick={(c2) => set({ c2 })} />
+          {three && (
             <>
-              <div className="section eyebrow">Teilung</div>
-              <Swatches value={a.c2} onPick={(c2) => set({ c2 })} />
+              <div className="section eyebrow">Drittes Feld</div>
+              <Swatches value={a.c3 ?? "schwarz"} onPick={(c3) => set({ c3 })} />
             </>
           )}
           {a.charge !== "keins" && (

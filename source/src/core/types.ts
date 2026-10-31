@@ -78,6 +78,7 @@ export interface Arms {
   shape: string;
   division: string;
   c1: string;
+  c3?: string;
   c2: string;
   charge: string;
   cc: string;
