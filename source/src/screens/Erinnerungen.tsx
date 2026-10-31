@@ -3,15 +3,17 @@ import { Icon } from "../components/Icon";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
 import type { Arms, Reminder } from "../core/types";
-import { todayISO } from "../core/overview";
+import { iso, todayISO } from "../core/overview";
 import { CoatOfArms, DEFAULT_ARMS } from "../core/heraldry";
 import { getShield } from "../core/shields";
 
 const NEW = "__neu__";
-type View = { kind: "smart"; id: "heute" | "geplant" | "alle" | "erledigt" } | { kind: "list"; name: string } | null;
+type SmartId = "heute" | "geplant" | "fristen" | "alle" | "erledigt";
+type View = { kind: "smart"; id: SmartId } | { kind: "list"; name: string } | { kind: "kalender" } | null;
 const SMART = [
   { id: "heute", name: "Heute" },
   { id: "geplant", name: "Geplant" },
+  { id: "fristen", name: "Fristen" },
   { id: "alle", name: "Alle" },
   { id: "erledigt", name: "Erledigt" },
 ] as const;
@@ -23,14 +25,28 @@ function fmtDate(r: Reminder) {
   return r.time ? `${label}, ${r.time}` : label;
 }
 
+const short = (iso: string) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "short" });
+const addDays = (d: string, n: number) => { const x = new Date(d + "T12:00:00"); x.setDate(x.getDate() + n); return iso(x); };
+const WD = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+
 const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
 const two = (n: number) => String(n).padStart(2, "0");
 const local = (d: Date) => `${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}T${two(d.getHours())}${two(d.getMinutes())}00`;
 
 /** Kalendereintrag als .ics. iOS bietet beim Öffnen „Zum Kalender hinzufügen“ an. */
+const stamp = () => new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+const allDay = (d: string) => { const n = new Date(d + "T12:00:00"); n.setDate(n.getDate() + 1); return [`DTSTART;VALUE=DATE:${d.replace(/-/g, "")}`, `DTEND;VALUE=DATE:${n.getFullYear()}${two(n.getMonth() + 1)}${two(n.getDate())}`]; };
+const fristEvent = (r: Reminder, kind: "Fristablauf" | "Vorfrist", d: string) => [
+  "BEGIN:VEVENT", `UID:${r.id}-${kind}@app`, `DTSTAMP:${stamp()}`, ...allDay(d), `SUMMARY:${esc(kind + ": " + r.title)}`,
+  r.notes ? `DESCRIPTION:${esc(r.notes)}` : "", kind === "Fristablauf" ? "PRIORITY:1" : "",
+  "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc(kind + ": " + r.title)}`, "TRIGGER:PT8H", "END:VALARM", "END:VEVENT",
+];
+
 function exportIcs(r: Reminder) {
-  if (!r.date) return;
-  let when: string[];
+  if (!r.date && !r.frist) return;
+  let when: string[] = [];
+  if (!r.date) { /* nur Frist */ }
+  else
   if (r.time) {
     const start = new Date(`${r.date}T${r.time}:00`);
     when = [`DTSTART:${local(start)}`, `DTEND:${local(new Date(start.getTime() + 30 * 60000))}`];
@@ -40,14 +56,16 @@ function exportIcs(r: Reminder) {
   }
   const ics = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//App//Erinnerungen//DE", "CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT", `UID:${r.id}@app`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`, ...when,
+    ...(r.frist ? fristEvent(r, "Fristablauf", r.frist) : []),
+    ...(r.vorfrist ? fristEvent(r, "Vorfrist", r.vorfrist) : []),
+    ...(r.date ? ["BEGIN:VEVENT", `UID:${r.id}@app`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`, ...when,
     `SUMMARY:${esc(r.title)}`,
     r.notes ? `DESCRIPTION:${esc(r.notes)}` : "",
     r.url ? `URL:${r.url}` : "",
     r.category ? `CATEGORIES:${esc(r.category)}` : "",
     r.urgent ? "PRIORITY:1" : "",
     "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc(r.title)}`, "TRIGGER:-PT0M", "END:VALARM",
-    "END:VEVENT", "END:VCALENDAR",
+    "END:VEVENT"] : []), "END:VCALENDAR",
   ].filter(Boolean).join("\r\n");
   const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
   const a = document.createElement("a");
@@ -85,23 +103,32 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
   const allLists = useMemo(() => Array.from(new Set([...lists, ...items.map((i) => i.category).filter(Boolean)])), [lists, items]);
 
   const inSmart = (id: string, r: Reminder) =>
-    id === "heute" ? !r.done && !!r.date && r.date <= today
-    : id === "geplant" ? !r.done && !!r.date
+    id === "heute" ? !r.done && ((!!r.date && r.date <= today) || (!!r.vorfrist && r.vorfrist <= today) || (!!r.frist && r.frist <= today))
+    : id === "geplant" ? !r.done && (!!r.date || !!r.frist)
+    : id === "fristen" ? !r.done && !!r.frist
     : id === "alle" ? !r.done
     : r.done;
 
-  const sortOpen = (a: Reminder, b: Reminder) => ((a.date ?? "9999") + (a.time ?? "") < (b.date ?? "9999") + (b.time ?? "") ? -1 : 1);
+  const key = (r: Reminder) => [r.date, r.vorfrist, r.frist].filter(Boolean).sort()[0] ?? "9999";
+  const sortOpen = (a: Reminder, b: Reminder) => (view?.kind === "smart" && view.id === "fristen"
+    ? ((a.frist ?? "") < (b.frist ?? "") ? -1 : 1)
+    : key(a) + (a.time ?? "") < key(b) + (b.time ?? "") ? -1 : 1);
+  const [calMonth, setCalMonth] = useState(() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); });
+  const [calDay, setCalDay] = useState(today);
 
   function openNew() {
     const cat = view?.kind === "list" ? view.name : "";
-    setDraft({ id: crypto.randomUUID(), title: "", category: cat, done: false, createdAt: Date.now(), date: view?.kind === "smart" && view.id === "heute" ? today : undefined });
+    const fr = view?.kind === "smart" && view.id === "fristen";
+    setDraft({ id: crypto.randomUUID(), title: "", category: cat, done: false, createdAt: Date.now(),
+      date: view?.kind === "smart" && view.id === "heute" ? today : view?.kind === "kalender" ? calDay : undefined,
+      frist: fr ? addDays(today, 14) : undefined, vorfrist: fr ? addDays(today, 7) : undefined });
     setIsNew(true); setNewList("");
   }
   function save() {
     if (!draft || !draft.title.trim()) return;
     let cat = draft.category;
     if (cat === NEW) { cat = newList.trim(); if (cat && !lists.includes(cat)) setLists((p) => [...p, cat]); }
-    const clean: Reminder = { ...draft, title: draft.title.trim(), category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined };
+    const clean: Reminder = { ...draft, title: draft.title.trim(), category: cat, notes: draft.notes?.trim() || undefined, url: draft.url?.trim() || undefined, time: draft.date ? draft.time : undefined, vorfrist: draft.frist ? draft.vorfrist : undefined };
     setItems((p) => (isNew ? [clean, ...p] : p.map((r) => (r.id === clean.id ? clean : r))));
     setDraft(null);
   }
@@ -118,14 +145,16 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
         <button className="er-text" onClick={() => { setDraft({ ...r }); setIsNew(false); setNewList(""); }}>
           <div className="t">{r.urgent && <span className="er-urgent">!</span>}{r.title}</div>
           {r.notes && <div className="er-notes">{r.notes}</div>}
-          {(r.date || (view?.kind === "smart" && r.category)) && (
+          {(r.date || r.frist || (view?.kind === "smart" && r.category)) && (
             <div className="s">
               {r.date && <span className={late ? "er-late" : ""}>{fmtDate(r)}</span>}
+              {r.vorfrist && <span className={"er-vf" + (!r.done && r.vorfrist <= today ? " due" : "")}>VF {short(r.vorfrist)}</span>}
+              {r.frist && <span className={"er-frist" + (!r.done && r.frist <= today ? " due" : "")}>Frist {short(r.frist)}</span>}
               {view?.kind === "smart" && r.category && <span>{r.category}</span>}
             </div>
           )}
         </button>
-        {r.date && !r.done && <button className="icon-btn" onClick={() => exportIcs(r)} aria-label="Zum Kalender hinzufügen"><Icon name="kalender" /></button>}
+        {(r.date || r.frist) && !r.done && <button className="icon-btn" onClick={() => exportIcs(r)} aria-label="Zum Kalender hinzufügen"><Icon name="kalender" /></button>}
       </div>
     );
   };
@@ -140,11 +169,16 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
       <div className="er-smart">
         {SMART.map((s) => (
           <button key={s.id} className="card er-smart-card" onClick={() => setView({ kind: "smart", id: s.id })}>
-            <span className="er-smart-icon"><Icon name={s.id === "erledigt" ? "haken" : s.id === "alle" ? "archiv" : "kalender"} /></span>
+            <span className={"er-smart-icon" + (s.id === "fristen" ? " frist" : "")}><Icon name={s.id === "erledigt" ? "haken" : s.id === "alle" ? "archiv" : s.id === "fristen" ? "schwert" : "kalender"} /></span>
             <span className="er-smart-count">{items.filter((r) => inSmart(s.id, r)).length}</span>
             <span className="er-smart-name">{s.name}</span>
           </button>
         ))}
+        <button className="card er-smart-card" onClick={() => setView({ kind: "kalender" })}>
+          <span className="er-smart-icon"><Icon name="kalender" /></span>
+          <span className="er-smart-count">{new Date().getDate()}</span>
+          <span className="er-smart-name">Kalender</span>
+        </button>
       </div>
       {allLists.length > 0 && (
         <>
@@ -166,7 +200,57 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
 
   /* ---------- Eine Liste ---------- */
   let listBody = null;
-  if (view) {
+  if (view?.kind === "kalender") {
+    const first = calMonth;
+    const lead = (first.getDay() + 6) % 7;
+    const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    const cells: (string | null)[] = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => iso(new Date(first.getFullYear(), first.getMonth(), i + 1)))];
+    const shift = (n: number) => setCalMonth(new Date(first.getFullYear(), first.getMonth() + n, 1));
+    const on = (c: string) => items.filter((r) => r.date === c || r.frist === c || r.vorfrist === c);
+    const sel = on(calDay).sort((a, b) => (a.frist === calDay ? 0 : a.vorfrist === calDay ? 1 : 2) - (b.frist === calDay ? 0 : b.vorfrist === calDay ? 1 : 2));
+    listBody = (
+      <>
+        <div className="topbar">
+          <button className="back" onClick={() => setView(null)} aria-label="Zurück"><Icon name="back" /></button>
+          <h1>Kalender</h1>
+        </div>
+        <div className="card zy-cal">
+          <div className="zy-head">
+            <button className="icon-btn" onClick={() => shift(-1)} aria-label="Voriger Monat"><Icon name="links" /></button>
+            <span>{first.toLocaleDateString("de-DE", { month: "long", year: "numeric" })}</span>
+            <button className="icon-btn" onClick={() => shift(1)} aria-label="Nächster Monat"><Icon name="rechts" /></button>
+          </div>
+          <div className="zy-grid">
+            {WD.map((w) => <div key={w} className="zy-wd">{w}</div>)}
+            {cells.map((c, i) => {
+              if (!c) return <div key={"e" + i} />;
+              const list = on(c).filter((r) => !r.done);
+              const fr = list.some((r) => r.frist === c);
+              const vf = list.some((r) => r.vorfrist === c);
+              const n = list.filter((r) => r.date === c).length;
+              return (
+                <button key={c} className={"zy-day er-cd" + (c === calDay ? " sel" : "") + (c === today ? " today" : "") + (fr ? " frist" : "") + (vf ? " vf" : "")} onClick={() => setCalDay(c)}>
+                  <span>{Number(c.slice(8))}</span>
+                  <span className="zy-marks">{n > 0 && <i className="er-dot" />}{n > 1 && <i className="er-dot" />}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="section eyebrow">{new Date(calDay + "T12:00:00").toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}</div>
+        <div className="er-group">
+          {sel.map((r) => (
+            <div key={r.id} className={r.frist === calDay ? "er-cal-frist" : r.vorfrist === calDay ? "er-cal-vf" : ""}>
+              {r.frist === calDay && <div className="er-cal-tag">Fristablauf</div>}
+              {r.vorfrist === calDay && r.frist !== calDay && <div className="er-cal-tag">Vorfrist</div>}
+              <Row r={r} />
+            </div>
+          ))}
+          {sel.length === 0 && <div className="empty">Keine Einträge</div>}
+        </div>
+      </>
+    );
+  } else if (view) {
     const title = view.kind === "smart" ? SMART.find((s) => s.id === view.id)!.name : view.name;
     const base = view.kind === "smart" ? items.filter((r) => inSmart(view.id, r)) : items.filter((r) => r.category === view.name);
     const open = base.filter((r) => !r.done).sort(sortOpen);
@@ -237,6 +321,24 @@ export function Erinnerungen({ back }: { mod: ModuleDef; back: () => void }) {
                 <span className="sheet-name">Dringend</span>
                 <Toggle on={!!d.urgent} onChange={(v) => upd({ urgent: v || undefined })} />
               </div>
+            </div>
+
+            <div className="sheet-label">Frist</div>
+            <div className="sheet-card rows">
+              <div className="sheet-row">
+                <span className="sheet-ic frist"><Icon name="schwert" /></span>
+                <span className="sheet-name">Fristablauf{d.frist && <small>{short(d.frist)}</small>}</span>
+                <Toggle on={!!d.frist} onChange={(v) => upd(v ? { frist: d.frist ?? addDays(today, 14), vorfrist: d.vorfrist ?? addDays(d.frist ?? addDays(today, 14), -7) } : { frist: undefined, vorfrist: undefined })} />
+              </div>
+              {d.frist && <div className="sheet-sub"><input className="sheet-in" type="date" value={d.frist} onChange={(e) => upd({ frist: e.target.value || d.frist })} /></div>}
+              {d.frist && (
+                <div className="sheet-row">
+                  <span className="sheet-ic"><Icon name="kalender" /></span>
+                  <span className="sheet-name">Vorfrist{d.vorfrist && <small>{short(d.vorfrist)}</small>}</span>
+                  <Toggle on={!!d.vorfrist} onChange={(v) => upd({ vorfrist: v ? addDays(d.frist!, -7) : undefined })} />
+                </div>
+              )}
+              {d.frist && d.vorfrist && <div className="sheet-sub"><input className="sheet-in" type="date" value={d.vorfrist} max={d.frist} onChange={(e) => upd({ vorfrist: e.target.value || d.vorfrist })} /></div>}
             </div>
 
             <div className="sheet-label">Weitere Optionen</div>

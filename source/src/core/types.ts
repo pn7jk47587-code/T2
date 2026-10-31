@@ -63,6 +63,10 @@ export interface Reminder {
   notes?: string;
   url?: string;
   urgent?: boolean;
+  /** Fristablauf, YYYY-MM-DD */
+  frist?: string;
+  /** Vorfrist, YYYY-MM-DD */
+  vorfrist?: string;
 }
 
 /** Ein Tag im Zyklus. flow 1–4: leicht, mittel, stark, sehr stark. pain 1–4. */

@@ -28,7 +28,7 @@ export function useOverviewValues(): Record<string, string> {
   const [cyc] = useStored<CycleLog>("zyklus", {});
   const cd = cycleDay(cyc);
   const t = todayISO();
-  const due = rem.filter((r) => !r.done && r.date && r.date <= t).length;
+  const due = rem.filter((r) => !r.done && ((r.date && r.date <= t) || (r.vorfrist && r.vorfrist <= t) || (r.frist && r.frist <= t))).length;
   const out: Record<string, string> = { dueToday: String(due) };
   if (cd) out.cycleDay = String(cd);
   return out;

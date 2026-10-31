@@ -365,3 +365,19 @@ input, textarea { font: inherit; color: inherit; }
 .zy-imp-prev { display: grid; gap: 6px; }
 .zy-imp-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .zy-imp-keys pre { font-size: 11px; white-space: pre-wrap; opacity: .7; max-height: 200px; overflow: auto; }
+/* Fristen */
+.er-smart-icon.frist { background: linear-gradient(180deg, #e2e5e8, #8a9097); color: #6e1424; }
+.sheet-ic.frist { color: var(--burgund-hell); }
+.er-frist, .er-vf { font-weight: 600; letter-spacing: .02em; }
+.er-frist { color: #fff; background: var(--burgund); padding: 0 6px; border-radius: 4px; }
+.er-frist.due { background: var(--burgund-hell); box-shadow: 0 0 10px rgba(179,36,59,.6); }
+.er-vf { color: var(--burgund-hell); }
+.er-vf.due { text-decoration: underline; }
+.er-cd.frist { background: linear-gradient(180deg, #b3243b, #6a0f20); color: #fff; box-shadow: 0 0 10px rgba(179,36,59,.45); }
+.er-cd.vf:not(.frist) { border-color: var(--burgund-hell); border-style: dashed; }
+.er-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--silber, #cfd3d7); display: inline-block; }
+.er-cd .zy-marks { display: flex; gap: 2px; min-height: 5px; }
+.er-cal-frist { border-left: 0; background: rgba(179,36,59,.16); }
+.er-cal-vf { background: rgba(179,36,59,.06); }
+.er-cal-tag { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--burgund-hell); padding: 8px 14px 0; }
+.er-cal-frist .er-cal-tag { color: #f1c3cb; }
