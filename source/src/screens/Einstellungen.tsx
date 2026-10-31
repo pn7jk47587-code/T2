@@ -8,7 +8,7 @@ import { getSkin, useNav, useSkin } from "../core/skins";
 export function Einstellungen({ mod, back }: { mod: ModuleDef; back: () => void }) {
   const [profile, setProfile] = useStored<Profile>("profile", defaultProfile);
   const nav = useNav();
-  const [homeMode, setHomeMode] = useStored<string>("homeMode", "kacheln");
+  const [homeMode, setHomeMode] = useStored<string>("homeMode", "ruestung");
   const skin = useSkin();
 
   return (

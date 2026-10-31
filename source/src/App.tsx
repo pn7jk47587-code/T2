@@ -46,7 +46,7 @@ function useRoute() {
 export default function App() {
   const [id, go] = useRoute();
   const [skinId, setSkinId] = useStored<string>("skin", "glanz");
-  const [homeMode] = useStored<string>("homeMode", "kacheln");
+  const [homeMode, , homeReady] = useStored<string>("homeMode", "ruestung");
   const skin = getSkin(skinId);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function App() {
   return (
     <SkinCtx.Provider value={skin}>
       <NavCtx.Provider value={go}>
-        {id === "ruestkammer" || (id === "" && homeMode === "ruestung") ? (
+        {id === "" && !homeReady ? null : id === "ruestkammer" || (id === "" && homeMode === "ruestung") ? (
           <Suspense fallback={null}>
             <Ruestkammer back={id === "ruestkammer" ? () => go("einstellungen") : undefined} go={go} />
           </Suspense>
