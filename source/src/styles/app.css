@@ -389,8 +389,9 @@ input, textarea { font: inherit; color: inherit; }
 .wp-sws.metals { padding-bottom: 18px; }
 /* Einklappbare Überschriften: Pfeil rechts, größer */
 .fold-head { display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; }
-.fold-head svg { width: 26px; height: 26px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s; margin-right: 4px; }
-.fold-head svg.open { transform: rotate(90deg); }
+.fold-hand { display: grid; place-items: center; width: 34px; height: 34px; margin-right: 2px; color: var(--silber, #dfe3e6); transition: transform .25s; }
+.fold-hand svg { width: 30px; height: 30px; --icon-sw: 1.3; }
+.fold-hand.open { transform: rotate(90deg); color: var(--burgund-hell); }
 /* Sortieren per Ziehen */
 .sort-item { position: relative; transition: transform .18s ease; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .sort-item:not(:last-child) .er-list-row { border-bottom: 1px solid var(--line); }

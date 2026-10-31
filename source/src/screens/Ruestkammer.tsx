@@ -1,4 +1,4 @@
-import { colorById, dominantColor, type FeelingLog } from "../core/feelings";
+import { colorById, dominantColor, feelingById, type FeelingLog } from "../core/feelings";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -11,7 +11,7 @@ import { Reflector } from "three/examples/jsm/objects/Reflector.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry.js";
-import { ICONS } from "../core/icons";
+import { ICONS, UI_ICONS } from "../core/icons";
 import { Icon } from "../components/Icon";
 import { getModule, modules } from "../core/modules";
 import { useStored } from "../core/db";
@@ -91,8 +91,25 @@ function codeTexture(lines: string[]) {
   const g = c.getContext("2d")!;
   g.font = "600 26px ui-monospace, Menlo, Consolas, monospace";
   g.textBaseline = "top";
-  lines.forEach((l, i) => {
+  const hand = UI_ICONS.manicule.map((d) => new Path2D(d));
+  lines.forEach((raw, i) => {
     const y = 8 + i * lh;
+    const key = raw.startsWith("!");
+    const l = key ? raw.slice(1) : raw;
+    if (key) {
+      // Hervorhebung: Band hinter der Zeile, Manicula zeigt darauf
+      const tw = g.measureText(l).width;
+      const grd = g.createLinearGradient(0, 0, tw + 120, 0);
+      grd.addColorStop(0, "rgba(179,36,59,.55)"); grd.addColorStop(1, "rgba(179,36,59,0)");
+      g.fillStyle = grd; g.fillRect(64, y - 4, tw + 120, lh);
+      g.save(); g.translate(6, y - 6); g.scale(46 / 24, 46 / 24);
+      g.strokeStyle = "#f3d27a"; g.lineWidth = 1.5; g.lineCap = "round"; g.lineJoin = "round";
+      g.shadowColor = "#ff3048"; g.shadowBlur = 10;
+      for (const p of hand) g.stroke(p);
+      g.restore();
+      g.fillStyle = "#ffffff"; g.fillText(l.trimStart(), 70, y);
+      return;
+    }
     const m = l.match(/^(\s*)([^=:{}]+?)(\s*[=:]\s*)(.*)$/);
     if (l.trim().startsWith("//")) { g.fillStyle = "rgba(150,156,163,.8)"; g.fillText(l, 12, y); return; }
     if (!m) { g.fillStyle = "rgba(205,210,215,.9)"; g.fillText(l, 12, y); return; }
@@ -117,6 +134,8 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
   const [rem] = useStored<Reminder[]>("erinnerungen", []);
   const [cyc] = useStored<CycleLog>("zyklus", {});
+  const [feel] = useStored<FeelingLog>("gefuehle", {});
+  const dom = dominantColor(feel[todayISO()]);
   const lines = (() => {
     const today = new Date();
     const out = [`// ${today.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`, "tagesueberblick {"];
@@ -124,6 +143,17 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     out.push("}");
     const open = rem.filter((r) => !r.done);
     out.push(`erinnerungen.offen = ${open.length}`, `erinnerungen.erledigt = ${rem.length - open.length}`);
+    const t0 = todayISO();
+    const due = open.filter((r) => (r.date && r.date <= t0) || (r.vorfrist && r.vorfrist <= t0)).length;
+    if (due) out.push(`!erinnerungen.heute_faellig = ${due}`);
+    const days = (d: string) => Math.round((new Date(d + "T12:00:00").getTime() - new Date(t0 + "T12:00:00").getTime()) / 864e5);
+    open.filter((r) => r.frist).sort((a, b) => (a.frist! < b.frist! ? -1 : 1)).forEach((r) => {
+      const n = days(r.frist!);
+      const when = n < 0 ? `abgelaufen seit ${-n} T` : n === 0 ? "heute" : `in ${n} T`;
+      out.push(`${n <= 7 ? "!" : ""}frist["${r.title}"] = ${r.frist} // ${when}`);
+    });
+    const fe = feel[t0] ?? [];
+    if (fe.length) out.push(`gefuehle.heute = [${fe.map((id) => feelingById(id)?.name ?? id).join(", ")}]`, `gefuehle.tagesfarbe = ${dom ? colorById(dom).name.toLowerCase() : "weiß"}`);
     for (const l of Array.from(new Set(rem.map((r) => r.category).filter(Boolean)))) out.push(`liste["${l}"] = ${open.filter((r) => r.category === l).length}`);
     const cd = cycleDay(cyc);
     out.push(`zyklus.tag = ${cd ?? "—"}`);
@@ -136,8 +166,6 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   })();
   const linesKey = lines.join("\n");
   const goRef = useRef(go);
-  const [feel] = useStored<FeelingLog>("gefuehle", {});
-  const dom = dominantColor(feel[todayISO()]);
   const runeHex = useRef<string | null>(null);
   runeHex.current = dom ? colorById(dom).glow : null;
   goRef.current = go;
