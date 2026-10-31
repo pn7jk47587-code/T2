@@ -381,3 +381,5 @@ input, textarea { font: inherit; color: inherit; }
 .er-cal-vf { background: rgba(179,36,59,.06); }
 .er-cal-tag { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--burgund-hell); padding: 8px 14px 0; }
 .er-cal-frist .er-cal-tag { color: #f1c3cb; }
+.rk-logo { position: absolute; right: 12px; top: calc(var(--safe-top) + 8px); width: 52px; height: 52px; pointer-events: none; transition: opacity .3s; z-index: 2; }
+.rk-logo.hide { opacity: 0; }

@@ -1,3 +1,4 @@
+import logoUrl from "../assets-logo.png";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -392,6 +393,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     <>
       <div className="rk" data-skin={skin.id}>
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
+        <img className={"rk-logo" + (sel ? " hide" : "")} src={logoUrl} alt="" aria-hidden="true" />
         <div className={"rk-top" + (sel ? " hide" : "")}>
           <div className="rk-id">
             <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Einstellungen"><CoatOfArms arms={arms} /></button>
