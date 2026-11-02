@@ -93,6 +93,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "heldenbuch",
+    title: "Heldenbuch",
+    icon: "heldenbuch",
+    a: "var(--clay)",
+    b: "var(--umber)",
+    feeds: [],
+  },
+  {
     id: "befinden",
     title: "Siechenbuch",
     icon: "befinden",
