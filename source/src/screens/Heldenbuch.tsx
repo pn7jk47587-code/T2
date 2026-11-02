@@ -17,13 +17,14 @@ interface Hero {
 }
 interface Goal { id: string; text: string; done: boolean }
 interface Session { id: string; date: string; title: string; text: string }
-interface Book { hero: Hero; goals: Goal[]; sessions: Session[] }
+interface Plan { id: string; title: string; text: string; done: boolean }
+interface Book { hero: Hero; goals: Goal[]; plans: Plan[]; sessions: Session[] }
 
 const EMPTY: Book = {
   hero: { name: "", spezies: "", hintergrund: "", unterklasse: "", stufe: 1, stats: { str: 10, ges: 10, kon: 10, int: 10, wei: 10, cha: 10 }, tpMax: 8, tp: 8, fokus: 0, wesen: "", geschichte: "", ausruestung: "" },
-  goals: [], sessions: [],
+  goals: [], plans: [], sessions: [],
 };
-const TABS = ["Held", "Ziele", "Sitzungen", "Nachschlagen"] as const;
+const TABS = ["Held", "Ziele", "Pläne", "Sitzungen", "Nachschlagen"] as const;
 const mod = (v: number) => Math.floor((v - 10) / 2);
 const sign = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const m = (x: number) => (x ? `+${String(x).replace(".", ",")} m` : "–");
@@ -123,6 +124,31 @@ export function Heldenbuch({ mod: def, back }: { mod: ModuleDef; back: () => voi
 
       {tab === 2 && (
         <>
+          <button className="er-addlist" style={{ marginBottom: 10 }} onClick={() => { const pl: Plan = { id: crypto.randomUUID(), title: "", text: "", done: false }; setBook({ ...b, plans: [pl, ...b.plans] }); setOpen(pl.id); }}>+ Neuer Plan</button>
+          {b.plans.map((pl) => {
+            const upd = (p: Partial<Plan>) => setBook({ ...b, plans: b.plans.map((x) => (x.id === pl.id ? { ...x, ...p } : x)) });
+            return (
+              <div key={pl.id} className={"card hb-session" + (pl.done ? " hb-plan-done" : "")}>
+                <div className="hb-plan-head">
+                  <button className="hb-check" onClick={() => upd({ done: !pl.done })} aria-label={pl.done ? "Wieder offen" : "Umgesetzt"}>{pl.done ? "✓" : ""}</button>
+                  <button className="hb-session-head" onClick={() => setOpen(open === pl.id ? null : pl.id)}><b>{pl.title || "Plan"}</b></button>
+                </div>
+                {open === pl.id ? (
+                  <div className="hb-session-body">
+                    <input className="sheet-in" value={pl.title} placeholder="Titel" onChange={(e) => upd({ title: e.target.value })} />
+                    <textarea className="sheet-in" rows={6} value={pl.text} placeholder="Was hast du vor?" onChange={(e) => upd({ text: e.target.value })} />
+                    <button className="sheet-del" onClick={() => setBook({ ...b, plans: b.plans.filter((x) => x.id !== pl.id) })}>Plan verbannen</button>
+                  </div>
+                ) : pl.text && <p className="hb-preview">{pl.text}</p>}
+              </div>
+            );
+          })}
+          {!b.plans.length && <div className="empty">Noch keine Pläne</div>}
+        </>
+      )}
+
+      {tab === 3 && (
+        <>
           <button className="er-addlist" style={{ marginBottom: 10 }} onClick={() => { const s: Session = { id: crypto.randomUUID(), date: todayISO(), title: `Sitzung ${b.sessions.length + 1}`, text: "" }; setBook({ ...b, sessions: [s, ...b.sessions] }); setOpen(s.id); }}>+ Neue Sitzung</button>
           {b.sessions.map((s) => (
             <div key={s.id} className="card hb-session">
@@ -143,7 +169,7 @@ export function Heldenbuch({ mod: def, back }: { mod: ModuleDef; back: () => voi
         </>
       )}
 
-      {tab === 3 && (
+      {tab === 4 && (
         <>
           <div className="card hb-ref">
             <div className="hb-ref-row"><b>Stufe {lvl}</b><span>Übung {sign(pb)} · Kampfkunst {die} · Fokus {fp || "–"} · Bewegung {m(mv)}</span></div>

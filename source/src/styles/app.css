@@ -631,3 +631,7 @@ input, textarea { font: inherit; color: inherit; }
 .hb-feat p { margin: 6px 0 0; font-size: 14px; line-height: 1.45; color: var(--text-dim); }
 .hb-feat.later { opacity: .45; }
 .hb-attr { font-size: 11px; color: var(--text-faint); line-height: 1.4; margin: 14px 2px 30px; }
+.hb-tabs { grid-template-columns: repeat(5, 1fr); }
+.hb-tabs .am-tab { font-size: 11.5px; padding: 7px 0; }
+.hb-plan-head { display: flex; align-items: center; gap: 12px; }
+.hb-plan-done .hb-session-head b { color: var(--text-faint); text-decoration: line-through; }
