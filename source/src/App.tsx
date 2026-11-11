@@ -5,6 +5,7 @@ import { screenFor } from "./screens";
 import { getModule } from "./core/modules";
 import { useStored } from "./core/db";
 import { Backdrop, Particles } from "./components/Scenery";
+import { Jetzt } from "./components/Jetzt";
 import { applyFont } from "./core/fonts";
 import { Entwurf } from "./screens/Entwurf";
 import { Wappen } from "./screens/Wappen";
@@ -60,6 +61,7 @@ export default function App() {
   return (
     <SkinCtx.Provider value={skin}>
       <NavCtx.Provider value={go}>
+        <Jetzt />
         {id === "" && !homeReady ? null : id === "ruestkammer" || (id === "" && homeMode === "ruestung") ? (
           <Suspense fallback={null}>
             <Ruestkammer back={id === "ruestkammer" ? () => go("einstellungen") : undefined} go={go} />

@@ -8,6 +8,7 @@ import { Flickwerk } from "./Flickwerk";
 import { Befinden } from "./Befinden";
 import { Aufruesten } from "./Aufruesten";
 import { Heldenbuch } from "./Heldenbuch";
+import { Tagwerk } from "./Tagwerk";
 
 type Screen = (props: { mod: ModuleDef; back: () => void }) => JSX.Element;
 
@@ -21,6 +22,7 @@ export const screens: Record<string, Screen> = {
   befinden: Befinden,
   aufruesten: Aufruesten,
   heldenbuch: Heldenbuch,
+  tagwerk: Tagwerk,
 };
 
 export const screenFor = (id: string): Screen => screens[id] ?? Stub;

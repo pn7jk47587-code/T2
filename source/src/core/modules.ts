@@ -85,6 +85,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "tagwerk",
+    title: "Tagwerk",
+    icon: "tagwerk",
+    a: "var(--clay)",
+    b: "var(--moss)",
+    feeds: [],
+  },
+  {
     id: "aufruesten",
     title: "Aufrüsten",
     icon: "aufruesten",

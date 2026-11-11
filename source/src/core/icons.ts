@@ -15,6 +15,8 @@ export const ICONS: Record<string, string[]> = {
   // Geldbeutel (Säckel)
   finanzen: ["M8.6 8c-3 2.2-4.6 5.1-4.6 8 0 3 2.4 4.5 8 4.5s8-1.5 8-4.5c0-2.9-1.6-5.8-4.6-8Z", "M8.2 8h7.6", "M9 8 7.4 4.3c1.6.6 3 .6 4.6-.3 1.6.9 3 .9 4.6.3L15 8", "M10 14.6a2 2 0 1 0 4 0a2 2 0 1 0-4 0Z"],
   // Schlüssel
+  /** Sonnenuhr: Sonne über dem Horizont */
+  tagwerk: ["M3 18h18", "M7 18a5 5 0 0 1 10 0", "M12 8.5V5.5M6.2 11.2 4.4 9.4M17.8 11.2l1.8-1.8M2.8 14.5h1.4M19.8 14.5h1.4", "M12 18l2.6-3.4"],
   /** Zwanzigseitiger Würfel */
   heldenbuch: ["M12 2.5 20.2 7.2v9.6L12 21.5 3.8 16.8V7.2Z", "M12 2.5 7.6 10.2h8.8Z", "M7.6 10.2 12 17.6l4.4-7.4", "M3.8 7.2l3.8 3M20.2 7.2l-3.8 3M3.8 16.8 7.6 10.2M20.2 16.8l-3.8-6.6M12 17.6v3.9M3.8 16.8 12 17.6l8.2-.8"],
   /** Schwert über aufgeschlagenem Buch */

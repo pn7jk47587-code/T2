@@ -84,6 +84,14 @@ export function useStored<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(initial);
   const [ready, setReady] = useState(false);
   const initialRef = useRef(initial);
+  const srcRef = useRef({});
+
+  // Andere Bildschirme, die denselben Schlüssel nutzen, auf dem Laufenden halten
+  useEffect(() => {
+    const on = (e: Event) => { const d = (e as CustomEvent).detail as { key: string; value: T; src: object }; if (d.key === key && d.src !== srcRef.current) setValue(d.value); };
+    window.addEventListener("kv-change", on);
+    return () => window.removeEventListener("kv-change", on);
+  }, [key]);
 
   useEffect(() => {
     let alive = true;
@@ -102,6 +110,7 @@ export function useStored<T>(key: string, initial: T) {
       setValue((prev) => {
         const resolved = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
         void kvSet(key, resolved);
+        queueMicrotask(() => window.dispatchEvent(new CustomEvent("kv-change", { detail: { key, value: resolved, src: srcRef.current } })));
         return resolved;
       });
     },
