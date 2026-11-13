@@ -719,3 +719,10 @@ input, textarea { font: inherit; color: inherit; }
 .bb-go { display: block; width: 100%; margin-top: 18px; }
 .bb-go:disabled { opacity: .4; }
 .bb-look { display: block; margin-top: 12px; }
+.bb-srcs { padding: 6px 12px 10px; }
+.bb-src { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.bb-src span { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.bb-src b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bb-src small, .bb-src-foot small { opacity: .6; }
+.bb-src button { background: none; border: 0; color: inherit; font-size: 22px; opacity: .6; padding: 0 4px; }
+.bb-src-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; }

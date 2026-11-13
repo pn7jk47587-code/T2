@@ -12,7 +12,7 @@ import fellItUrl from "../assets/fonts/fell-kursiv.ttf?url";
 const MM = 72 / 25.4;
 export type Stil = "schlicht" | "manuskript";
 export type Schrift = "fraktur" | "buchschrift";
-export interface SatzOpts { pageW: number; pageH: number; size: number; lead: number; inner: number; outer: number; top: number; bottom: number; numbers: boolean; stil: Stil; schrift: Schrift; initiale: boolean; pergament: boolean }
+export interface SatzOpts { pageW: number; pageH: number; size: number; lead: number; inner: number; outer: number; top: number; bottom: number; numbers: boolean; stil: Stil; schrift: Schrift; initiale: boolean; pergament: boolean; firstPage?: number }
 export const DEFAULT_SATZ = { size: 11, lead: 1.35, inner: 18, outer: 14, top: 16, bottom: 20, numbers: true, stil: "schlicht" as Stil, schrift: "fraktur" as Schrift, initiale: true, pergament: false };
 
 const C = {
@@ -134,7 +134,7 @@ export async function docxToPdf(buf: ArrayBuffer, o: SatzOpts): Promise<{ bytes:
   const font = (st: Style) => F[`${st.b ? 1 : 0}${st.i ? 1 : 0}`];
   const ink = ms ? C.tinte : rgb(0, 0, 0);
   const W = o.pageW * MM, H = o.pageH * MM;
-  let page!: PDFPage; let pageNo = 0; let y = 0;
+  let page!: PDFPage; let pageNo = (o.firstPage ?? 1) - 1; let y = 0;
   const newPage = () => {
     page = pdf.addPage([W, H]); pageNo++; y = H - o.top * MM;
     if (ms && o.pergament) page.drawRectangle({ x: 0, y: 0, width: W, height: H, color: C.pergament });
@@ -238,7 +238,7 @@ export async function docxToPdf(buf: ArrayBuffer, o: SatzOpts): Promise<{ bytes:
     y -= after;
   }
   if (o.numbers) pdf.getPages().forEach((p, i) => {
-    const s = String(i + 1), f = F["00"], fs = o.size * 0.85;
+    const s = String(i + (o.firstPage ?? 1)), f = F["00"], fs = o.size * 0.85;
     p.drawText(s, { x: (W - f.widthOfTextAtSize(s, fs)) / 2, y: (o.bottom * MM) / 2 - fs / 2, size: fs, font: f, color: ms ? C.rubrum : ink });
   });
   return { bytes: await pdf.save(), pages: pdf.getPageCount(), skipped };
