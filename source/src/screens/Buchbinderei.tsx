@@ -4,7 +4,7 @@ import { FoldHead } from "../components/Fold";
 import { SortList } from "../components/SortList";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
-import { BOOK, DEFAULT_OPTS, PAPER, impose, plan, suggestions, type Opts } from "../core/ausschiessen";
+import { BOOK, DEFAULT_OPTS, PAPER, impose, lagenName, plan, suggestions, type Opts } from "../core/ausschiessen";
 import { DEFAULT_SATZ, docxToPdf } from "../core/wordSatz";
 
 function save(bytes: Uint8Array, name: string) {
@@ -100,8 +100,8 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
     setBusy(true); setGoing(true); setErr("");
     try {
       const r = await impose(file.buf.slice(0), hasPdf ? o : { ...o, fill: "original" });
-      if (o.split) { save(r.bytes[0], `${file.name}-vorderseiten.pdf`); setTimeout(() => save(r.bytes[1], `${file.name}-rueckseiten.pdf`), 600); }
-      else save(r.bytes[0], `${file.name}-zum-binden.pdf`);
+      if (o.split) { save(r.bytes[0], `${file.name}-schoendruck.pdf`); setTimeout(() => save(r.bytes[1], `${file.name}-widerdruck.pdf`), 600); }
+      else save(r.bytes[0], `${file.name}-ausgeschossen.pdf`);
     } catch (e) { setErr(e instanceof Error ? e.message : "Ausschießen fehlgeschlagen."); }
     setBusy(false); setGoing(false);
   };
@@ -124,7 +124,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
             </div>
           )} />
           <div className="bb-src-foot">
-            <small>{busy && !file ? "Wird gesetzt …" : file ? `${file.pages} Seiten im Buch` : ""}</small>
+            <small>{busy && !file ? "Wird gesetzt …" : file ? `${file.pages} Seiten im Buchblock` : ""}</small>
             <button className="bf-chip" onClick={() => input.current?.click()}>Datei hinzufügen</button>
           </div>
         </div>
@@ -133,7 +133,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       <div className="sheet-label">Druckbogen</div>
       <Chips v={o.paper} opts={Object.keys(PAPER).map((k) => [k, k] as [string, string]) as [Opts["paper"], string][]} on={(paper) => set({ paper })} />
 
-      <div className="sheet-label">Buchformat (fertige Seite)</div>
+      <div className="sheet-label">Endformat</div>
       <Chips v={presetKey} opts={[...Object.keys(BOOK), "Eigenes"].map((k) => [k, k] as [string, string])} on={(k) => { if (k !== "Eigenes") { const [w, h] = BOOK[k]; set({ bookW: w, bookH: h }); } else set({ bookW: o.bookW || 140, bookH: o.bookH || 200 }); }} />
       {presetKey === "Eigenes" && (
         <div className="bb-mm">
@@ -142,15 +142,15 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
         </div>
       )}
       <p className={"bb-info" + (fits ? "" : " bad")}>
-        {fits ? (trim && (trim.side > 0.5 || trim.top > 0.5) ? `Beschnitt mit der Guillotine: außen je ${trim.side.toFixed(1).replace(".", ",")} mm, oben und unten je ${trim.top.toFixed(1).replace(".", ",")} mm.` : "Passt genau auf den Bogen, kein Beschnitt nötig.")
+        {fits ? (trim && (trim.side > 0.5 || trim.top > 0.5) ? `Beschnitt: vorne je ${trim.side.toFixed(1).replace(".", ",")} mm, Kopf und Fuß je ${trim.top.toFixed(1).replace(".", ",")} mm.` : "Passt genau auf den Bogen, kein Beschnitt nötig.")
           : `Zwei Seiten à ${bookW}×${bookH} mm passen nicht auf ${o.paper} quer (${ph}×${pw} mm).`}
       </p>
 
-      <div className="sheet-label">Bogen pro Lage</div>
+      <div className="sheet-label">Doppelblätter je Lage</div>
       <div className="bb-mm">
         <label className="wide"><input className="sheet-in" value={sheetsText} inputMode="numeric" onChange={(e) => { setSheetsText(e.target.value); const v = e.target.value.split(/[,; ]+/).map(Number).filter((x) => x > 0 && x < 20); if (v.length) set({ sheets: v }); }} /></label>
       </div>
-      <p className="bb-info">{o.sheets.length > 1 ? `Abwechselnd ${o.sheets.join(", ")} Bogen.` : `${o.sheets[0]} Bogen = ${o.sheets[0] * 4} Seiten je Lage.`} Mehrere Zahlen mit Komma für wechselnde Lagengrößen.</p>
+      <p className="bb-info">{o.sheets.length > 1 ? `Abwechselnd ${o.sheets.map((n) => lagenName(n)).join(", ")}.` : `${lagenName(o.sheets[0])}: ${o.sheets[0]} Doppelblätter, ${o.sheets[0] * 4} Seiten je Lage.`} Mehrere Zahlen mit Komma für wechselnde Lagenstärken.</p>
 
       {hasWord && (
         <>
@@ -167,9 +167,9 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
               </div>
             </>
           )}
-          <div className="sheet-label">Schriftgröße</div>
+          <div className="sheet-label">Schriftgrad</div>
           <div className="hb-num"><button onClick={() => setSatz({ ...satz, size: Math.max(7, satz.size - 0.5) })}>−</button><b>{String(satz.size).replace(".", ",")} pt</b><button onClick={() => setSatz({ ...satz, size: Math.min(16, satz.size + 0.5) })}>+</button></div>
-          <div className="sheet-label">Seitenzahlen</div>
+          <div className="sheet-label">Pagina</div>
           <Chips v={satz.numbers ? "ja" : "nein"} opts={[["ja", "Ja"], ["nein", "Nein"]]} on={(v) => setSatz({ ...satz, numbers: v === "ja" })} />
           {file && !busy && <button className="au-btn bb-look" onClick={preview}>Satz ansehen</button>}
           {skipped > 0 && <p className="bb-info">{skipped} {skipped === 1 ? "Bild wurde" : "Bilder wurden"} ausgelassen.</p>}
@@ -182,36 +182,36 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
         </>
       )}
 
-      <div className="sheet-label">Beidseitig drucken, wenden über</div>
+      <div className="sheet-label">Widerdruck, wenden über</div>
       <Chips v={o.flip} opts={[["kurz", "Kurze Kante"], ["lang", "Lange Kante"]]} on={(flip) => set({ flip })} />
 
       <FoldHead label="Weitere Einstellungen" open={more} onToggle={() => setMore((v) => !v)} />
       {more && (
         <div className="bb-more">
-          <div className="sheet-label">Zusätzlicher Bundsteg</div>
+          <div className="sheet-label">Bundzugabe</div>
           <div className="hb-num"><button onClick={() => set({ gutter: Math.max(0, o.gutter - 1) })}>−</button><b>{o.gutter} mm</b><button onClick={() => set({ gutter: o.gutter + 1 })}>+</button></div>
-          <div className="sheet-label">Leerseiten zum Auffüllen</div>
+          <div className="sheet-label">Vakatseiten einfügen</div>
           <Chips v={o.pad} opts={[["hinten", "Hinten"], ["vorne", "Vorne"], ["verteilt", "Vorne und hinten"]]} on={(pad) => set({ pad })} />
-          <div className="sheet-label">Vorsatz (leere Seiten)</div>
+          <div className="sheet-label">Vorsatz und Nachsatz (leere Seiten)</div>
           <div className="bb-two">
-            <span>Vorne</span><div className="hb-num"><button onClick={() => set({ flyFront: Math.max(0, o.flyFront - 1) })}>−</button><b>{o.flyFront}</b><button onClick={() => set({ flyFront: o.flyFront + 1 })}>+</button></div>
-            <span>Hinten</span><div className="hb-num"><button onClick={() => set({ flyBack: Math.max(0, o.flyBack - 1) })}>−</button><b>{o.flyBack}</b><button onClick={() => set({ flyBack: o.flyBack + 1 })}>+</button></div>
+            <span>Vorsatz</span><div className="hb-num"><button onClick={() => set({ flyFront: Math.max(0, o.flyFront - 1) })}>−</button><b>{o.flyFront}</b><button onClick={() => set({ flyFront: o.flyFront + 1 })}>+</button></div>
+            <span>Nachsatz</span><div className="hb-num"><button onClick={() => set({ flyBack: Math.max(0, o.flyBack - 1) })}>−</button><b>{o.flyBack}</b><button onClick={() => set({ flyBack: o.flyBack + 1 })}>+</button></div>
           </div>
-          <div className="sheet-label">Bindung</div>
+          <div className="sheet-label">Bundseite</div>
           <Chips v={o.rtl ? "r" : "l"} opts={[["l", "Links"], ["r", "Rechts"]]} on={(v) => set({ rtl: v === "r" })} />
-          <div className="sheet-label">Marken</div>
+          <div className="sheet-label">Druckmarken</div>
           <div className="bf-chips">
             <button className={"bf-chip" + (o.crop ? " on" : "")} onClick={() => set({ crop: !o.crop })}>Schnittmarken</button>
             <button className={"bf-chip" + (o.fold ? " on" : "")} onClick={() => set({ fold: !o.fold })}>Falzmarken</button>
-            <button className={"bf-chip" + (o.sigMark ? " on" : "")} onClick={() => set({ sigMark: !o.sigMark })}>Flattermarke und Lagennummer</button>
+            <button className={"bf-chip" + (o.sigMark ? " on" : "")} onClick={() => set({ sigMark: !o.sigMark })}>Flattermarke und Bogensignatur</button>
           </div>
-          <div className="sheet-label">Stechlöcher auf dem Falz</div>
+          <div className="sheet-label">Heftlöcher im Falz</div>
           <div className="bb-two">
             <span>Anzahl</span><div className="hb-num"><button onClick={() => set({ holes: o.holes <= 2 ? 0 : o.holes - 1 })}>−</button><b>{o.holes || "keine"}</b><button onClick={() => set({ holes: o.holes < 2 ? 2 : o.holes + 1 })}>+</button></div>
             {o.holes > 1 && <><span>Abstand Kopf/Fuß</span><div className="hb-num"><button onClick={() => set({ holeEdge: Math.max(3, o.holeEdge - 1) })}>−</button><b>{o.holeEdge} mm</b><button onClick={() => set({ holeEdge: o.holeEdge + 1 })}>+</button></div></>}
           </div>
-          <div className="sheet-label">Drucker ohne Beidseitendruck</div>
-          <Chips v={o.split ? "ja" : "nein"} opts={[["nein", "Eine Datei"], ["ja", "Vorder- und Rückseiten getrennt"]]} on={(v) => set({ split: v === "ja" })} />
+          <div className="sheet-label">Drucker ohne beidseitigen Druck</div>
+          <Chips v={o.split ? "ja" : "nein"} opts={[["nein", "Eine Datei"], ["ja", "Schön- und Widerdruck getrennt"]]} on={(v) => set({ split: v === "ja" })} />
         </div>
       )}
 
@@ -219,11 +219,11 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
         <>
           <div className="sheet-label">Plan</div>
           <div className="card bb-plan">
-            <p>{pl.sigs.length} {pl.sigs.length === 1 ? "Lage" : "Lagen"} · {pl.sigs.reduce((a, s) => a + s.sheets.length, 0)} Bogen · {pl.blanks} Leerseiten ergänzt</p>
+            <p>{pl.sigs.length} {pl.sigs.length === 1 ? "Lage" : "Lagen"} · {pl.sigs.reduce((a, s) => a + s.sheets.length, 0)} Bogen · {pl.blanks} {pl.blanks === 1 ? "Vakatseite" : "Vakatseiten"}</p>
             {pl.sigs.map((s, i) => (
               <details key={i}>
-                <summary>Lage {i + 1}: {s.sheets.length} Bogen</summary>
-                <table className="bb-tab"><thead><tr><th>Bogen</th><th>Vorderseite</th><th>Rückseite</th></tr></thead>
+                <summary>Lage {i + 1}: {lagenName(s.sheets.length)}</summary>
+                <table className="bb-tab"><thead><tr><th>Bogen</th><th>Schöndruck</th><th>Widerdruck</th></tr></thead>
                   <tbody>{s.sheets.map((sh, k) => <tr key={k}><td>{k + 1}</td><td>{lbl(sh.front[0])} | {lbl(sh.front[1])}</td><td>{lbl(sh.back[0])} | {lbl(sh.back[1])}</td></tr>)}</tbody>
                 </table>
               </details>
@@ -234,21 +234,21 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
 
       {sug && pl && sug.list.length > 0 && (
         <>
-          <div className="sheet-label">Vorschläge ohne Leerseiten</div>
+          <div className="sheet-label">Lagenvorschläge ohne Vakatseiten</div>
           <div className="bf-chips bb-sug">
             {sug.list.map((v) => {
               const on = v.sheets.join() === pl.sigs.map((x) => x.sheets.length).join();
               return <button key={v.label} className={"bf-chip" + (on ? " on" : "")} onClick={() => { set({ sheets: v.sheets }); setSheetsText(v.sheets.join(", ")); }}>{v.label}</button>;
             })}
           </div>
-          {sug.rest > 0 && <p className="bb-info">{sug.rest} {sug.rest === 1 ? "Leerseite bleibt" : "Leerseiten bleiben"}, weil jeder Bogen vier Seiten trägt.</p>}
+          {sug.rest > 0 && <p className="bb-info">{sug.rest} {sug.rest === 1 ? "Vakatseite bleibt" : "Vakatseiten bleiben"}, weil jeder Bogen vier Seiten trägt.</p>}
         </>
       )}
 
       {err && <p className="bb-info bad">{err}</p>}
-      <button className="au-btn primary bb-go" disabled={!file || !fits || busy} onClick={run}>{going ? "Wird ausgeschossen …" : busy ? "Wird zusammengestellt …" : "Zum Binden vorbereiten"}</button>
+      <button className="au-btn primary bb-go" disabled={!file || !fits || busy} onClick={run}>{going ? "Wird ausgeschossen …" : busy ? "Wird zusammengestellt …" : "Ausschießen"}</button>
       <p className="bb-info">
-        Drucken in Originalgröße (100 %, nicht „an Seite anpassen“), {o.paper} quer, {o.split ? "erst die Vorderseiten, den Stapel wenden, dann die Rückseiten" : `beidseitig, wenden über die ${o.flip === "kurz" ? "kurze" : "lange"} Kante`}. Bogen jeder Lage in der gedruckten Reihenfolge ineinanderlegen und falzen.
+        Drucken in Originalgröße (100 %, nicht „an Seite anpassen“), {o.paper} quer, {o.split ? "erst den Schöndruck, den Stapel wenden, dann den Widerdruck" : `beidseitig, wenden über die ${o.flip === "kurz" ? "kurze" : "lange"} Kante`}. Die Bogen jeder Lage in der Druckreihenfolge falzen und ineinanderstecken, dann die Lagen zusammentragen.
       </p>
     </Shell>
   );

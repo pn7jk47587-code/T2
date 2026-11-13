@@ -6,7 +6,7 @@ import { PDFDocument, degrees, rgb, StandardFonts } from "pdf-lib";
 
 export const MM = 72 / 25.4;
 export const PAPER: Record<string, [number, number]> = { A4: [210, 297], B5: [176, 250], A5: [148, 210] };
-export const BOOK: Record<string, [number, number]> = { A5: [148, 210], B6: [125, 176], A6: [105, 148], "Wie Druckbogen": [0, 0] };
+export const BOOK: Record<string, [number, number]> = { A5: [148, 210], B6: [125, 176], A6: [105, 148], Folio: [0, 0] };
 
 export interface Opts {
   paper: keyof typeof PAPER;
@@ -59,6 +59,10 @@ export function plan(pageCount: number, o: Opts) {
   return { sigs: out, blanks, total: cap };
 }
 
+const LAGE = ["", "Unio", "Binio", "Ternio", "Quaternio", "Quinio", "Senio", "Septenio", "Oktonio"];
+/** Kodikologische Bezeichnung einer Lage nach der Zahl ihrer Doppelblätter */
+export const lagenName = (n: number, plural = false) => (LAGE[n] ? LAGE[n] + (plural ? "nen" : "") : `Lage aus ${n} Doppelblättern`);
+
 /** Ausgewogene Lagenaufteilungen mit 3 bis 8 Bogen je Lage, die nur den unvermeidlichen Rest leer lassen */
 export function suggestions(pageCount: number, o: Opts, min = 3, max = 8) {
   const n = pageCount + o.flyFront + o.flyBack;
@@ -68,8 +72,9 @@ export function suggestions(pageCount: number, o: Opts, min = 3, max = 8) {
     const q = Math.floor(S / c), r = S % c;
     if (q < min || q + (r ? 1 : 0) > max) continue;
     const sheets = [...Array(r).fill(q + 1), ...Array(c - r).fill(q)];
-    const parts = [r && `${r} × ${q + 1}`, c - r && `${c - r} × ${q}`].filter(Boolean).join(" und ");
-    out.push({ sheets, label: `${c} ${c === 1 ? "Lage" : "Lagen"}: ${parts} Bogen` });
+    const part = (k: number, size: number) => `${k} ${lagenName(size, k > 1)}`;
+    const parts = [r && part(r, q + 1), c - r && part(c - r, q)].filter(Boolean).join(" und ");
+    out.push({ sheets, label: `${c} ${c === 1 ? "Lage" : "Lagen"}: ${parts}` });
   }
   return { list: out, rest: S * 4 - n };
 }
