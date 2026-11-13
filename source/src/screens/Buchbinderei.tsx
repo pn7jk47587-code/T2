@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shell } from "../components/Shell";
 import { FoldHead } from "../components/Fold";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
 import { BOOK, DEFAULT_OPTS, PAPER, impose, plan, type Opts } from "../core/ausschiessen";
+import { DEFAULT_SATZ, docxToPdf } from "../core/wordSatz";
 
 function save(bytes: Uint8Array, name: string) {
   const url = URL.createObjectURL(new Blob([bytes as unknown as ArrayBuffer], { type: "application/pdf" }));
@@ -22,9 +23,16 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
   const [err, setErr] = useState("");
   const [more, setMore] = useState(false);
   const [sheetsText, setSheetsText] = useState(o.sheets.join(", "));
+  const [rawSatz, setSatz] = useStored("buchbinderei-satz", DEFAULT_SATZ);
+  const satz = { ...DEFAULT_SATZ, ...rawSatz };
+  const [word, setWord] = useState<{ name: string; buf: ArrayBuffer } | null>(null);
+  const [skipped, setSkipped] = useState(0);
 
   const pick = async (f?: File) => {
     setErr(""); if (!f) return;
+    if (/\.doc$/i.test(f.name)) { setErr("Alte .doc-Dateien in Word als .docx speichern."); return; }
+    if (/\.docx$/i.test(f.name)) { setFile(null); setWord({ name: f.name.replace(/\.docx$/i, ""), buf: await f.arrayBuffer() }); return; }
+    setWord(null); setSkipped(0);
     try {
       const buf = await f.arrayBuffer();
       const { PDFDocument } = await import("pdf-lib");
@@ -37,6 +45,18 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
   const bookW = o.bookW || ph / 2, bookH = o.bookH || pw;
   const fits = bookW * 2 <= ph + 0.5 && bookH <= pw + 0.5;
   const trim = fits ? { side: (ph - bookW * 2) / 2, top: (pw - bookH) / 2 } : null;
+
+  useEffect(() => {
+    if (!word || !fits) return;
+    let off = false;
+    setBusy(true); setErr("");
+    docxToPdf(word.buf.slice(0), { pageW: bookW, pageH: bookH, ...satz })
+      .then((r) => { if (!off) { setFile({ name: word.name, buf: r.bytes.buffer.slice(r.bytes.byteOffset, r.bytes.byteOffset + r.bytes.byteLength) as ArrayBuffer, pages: r.pages }); setSkipped(r.skipped); } })
+      .catch(() => { if (!off) setErr("Die Word-Datei lässt sich nicht lesen."); })
+      .finally(() => { if (!off) setBusy(false); });
+    return () => { off = true; };
+  }, [word, bookW, bookH, fits, satz.size, satz.numbers]);
+
   const pl = file ? plan(file.pages, o) : null;
   const presetKey = Object.entries(BOOK).find(([, v]) => v[0] === o.bookW && v[1] === o.bookH)?.[0] ?? "Eigenes";
 
@@ -44,7 +64,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
     if (!file) return;
     setBusy(true); setErr("");
     try {
-      const r = await impose(file.buf.slice(0), o);
+      const r = await impose(file.buf.slice(0), word ? { ...o, fill: "original" } : o);
       if (o.split) { save(r.bytes[0], `${file.name}-vorderseiten.pdf`); setTimeout(() => save(r.bytes[1], `${file.name}-rueckseiten.pdf`), 600); }
       else save(r.bytes[0], `${file.name}-zum-binden.pdf`);
     } catch (e) { setErr(e instanceof Error ? e.message : "Ausschießen fehlgeschlagen."); }
@@ -57,9 +77,9 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
 
   return (
     <Shell mod={mod} back={back} emblem={false}>
-      <input ref={input} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
+      <input ref={input} type="file" accept="application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
       <button className="card bb-file" onClick={() => input.current?.click()}>
-        {file ? <><b>{file.name}</b><small>{file.pages} Seiten · andere Datei wählen</small></> : <><b>PDF wählen</b><small>Die Datei bleibt auf diesem Gerät</small></>}
+        {word && !file ? <><b>{word.name}</b><small>Wird gesetzt …</small></> : file ? <><b>{file.name}</b><small>{file.pages} Seiten{word ? " im Buchformat gesetzt" : ""} · andere Datei wählen</small></> : <><b>PDF oder Word wählen</b><small>Die Datei bleibt auf diesem Gerät</small></>}
       </button>
 
       <div className="sheet-label">Druckbogen</div>
@@ -84,8 +104,20 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       </div>
       <p className="bb-info">{o.sheets.length > 1 ? `Abwechselnd ${o.sheets.join(", ")} Bogen.` : `${o.sheets[0]} Bogen = ${o.sheets[0] * 4} Seiten je Lage.`} Mehrere Zahlen mit Komma für wechselnde Lagengrößen.</p>
 
-      <div className="sheet-label">Seite einpassen</div>
-      <Chips v={o.fill} opts={[["einpassen", "Einpassen"], ["fuellen", "Füllen"], ["original", "Originalgröße"]]} on={(fill) => set({ fill })} />
+      {word ? (
+        <>
+          <div className="sheet-label">Schriftgröße</div>
+          <div className="hb-num"><button onClick={() => setSatz({ ...satz, size: Math.max(7, satz.size - 0.5) })}>−</button><b>{String(satz.size).replace(".", ",")} pt</b><button onClick={() => setSatz({ ...satz, size: Math.min(16, satz.size + 0.5) })}>+</button></div>
+          <div className="sheet-label">Seitenzahlen</div>
+          <Chips v={satz.numbers ? "ja" : "nein"} opts={[["ja", "Ja"], ["nein", "Nein"]]} on={(v) => setSatz({ ...satz, numbers: v === "ja" })} />
+          {skipped > 0 && <p className="bb-info">{skipped} {skipped === 1 ? "Bild wurde" : "Bilder wurden"} ausgelassen.</p>}
+        </>
+      ) : (
+        <>
+          <div className="sheet-label">Seite einpassen</div>
+          <Chips v={o.fill} opts={[["einpassen", "Einpassen"], ["fuellen", "Füllen"], ["original", "Originalgröße"]]} on={(fill) => set({ fill })} />
+        </>
+      )}
 
       <div className="sheet-label">Beidseitig drucken, wenden über</div>
       <Chips v={o.flip} opts={[["kurz", "Kurze Kante"], ["lang", "Lange Kante"]]} on={(flip) => set({ flip })} />
@@ -138,7 +170,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       )}
 
       {err && <p className="bb-info bad">{err}</p>}
-      <button className="au-btn primary bb-go" disabled={!file || !fits || busy} onClick={run}>{busy ? "Wird ausgeschossen …" : "Zum Binden vorbereiten"}</button>
+      <button className="au-btn primary bb-go" disabled={!file || !fits || busy} onClick={run}>{busy ? (word && !pl ? "Wird gesetzt …" : "Wird ausgeschossen …") : "Zum Binden vorbereiten"}</button>
       <p className="bb-info">
         Drucken in Originalgröße (100 %, nicht „an Seite anpassen“), {o.paper} quer, {o.split ? "erst die Vorderseiten, den Stapel wenden, dann die Rückseiten" : `beidseitig, wenden über die ${o.flip === "kurz" ? "kurze" : "lange"} Kante`}. Bogen jeder Lage in der gedruckten Reihenfolge ineinanderlegen und falzen.
       </p>
