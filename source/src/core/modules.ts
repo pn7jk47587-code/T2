@@ -117,6 +117,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "buchbinderei",
+    title: "Buchbinderei",
+    icon: "buchbinderei",
+    a: "var(--umber)",
+    b: "var(--clay)",
+    feeds: [],
+  },
+  {
     id: "flickwerk",
     title: "Flickwerk",
     icon: "flickwerk",
