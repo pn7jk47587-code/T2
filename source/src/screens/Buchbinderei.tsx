@@ -3,7 +3,7 @@ import { Shell } from "../components/Shell";
 import { FoldHead } from "../components/Fold";
 import type { ModuleDef } from "../core/modules";
 import { useStored } from "../core/db";
-import { BOOK, DEFAULT_OPTS, PAPER, impose, plan, type Opts } from "../core/ausschiessen";
+import { BOOK, DEFAULT_OPTS, PAPER, impose, plan, suggestions, type Opts } from "../core/ausschiessen";
 import { DEFAULT_SATZ, docxToPdf } from "../core/wordSatz";
 
 function save(bytes: Uint8Array, name: string) {
@@ -58,6 +58,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
   }, [word, bookW, bookH, fits, satz.size, satz.numbers]);
 
   const pl = file ? plan(file.pages, o) : null;
+  const sug = file ? suggestions(file.pages, o) : null;
   const presetKey = Object.entries(BOOK).find(([, v]) => v[0] === o.bookW && v[1] === o.bookH)?.[0] ?? "Eigenes";
 
   const run = async () => {
@@ -166,6 +167,19 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
               </details>
             ))}
           </div>
+        </>
+      )}
+
+      {sug && pl && sug.list.length > 0 && (
+        <>
+          <div className="sheet-label">Vorschläge ohne Leerseiten</div>
+          <div className="bf-chips bb-sug">
+            {sug.list.map((v) => {
+              const on = v.sheets.join() === pl.sigs.map((x) => x.sheets.length).join();
+              return <button key={v.label} className={"bf-chip" + (on ? " on" : "")} onClick={() => { set({ sheets: v.sheets }); setSheetsText(v.sheets.join(", ")); }}>{v.label}</button>;
+            })}
+          </div>
+          {sug.rest > 0 && <p className="bb-info">{sug.rest} {sug.rest === 1 ? "Leerseite bleibt" : "Leerseiten bleiben"}, weil jeder Bogen vier Seiten trägt.</p>}
         </>
       )}
 

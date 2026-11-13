@@ -59,6 +59,21 @@ export function plan(pageCount: number, o: Opts) {
   return { sigs: out, blanks, total: cap };
 }
 
+/** Ausgewogene Lagenaufteilungen mit 3 bis 8 Bogen je Lage, die nur den unvermeidlichen Rest leer lassen */
+export function suggestions(pageCount: number, o: Opts, min = 3, max = 8) {
+  const n = pageCount + o.flyFront + o.flyBack;
+  const S = Math.ceil(n / 4);
+  const out: { sheets: number[]; label: string }[] = [];
+  for (let c = Math.ceil(S / max); c <= Math.floor(S / min); c++) {
+    const q = Math.floor(S / c), r = S % c;
+    if (q < min || q + (r ? 1 : 0) > max) continue;
+    const sheets = [...Array(r).fill(q + 1), ...Array(c - r).fill(q)];
+    const parts = [r && `${r} × ${q + 1}`, c - r && `${c - r} × ${q}`].filter(Boolean).join(" und ");
+    out.push({ sheets, label: `${c} ${c === 1 ? "Lage" : "Lagen"}: ${parts} Bogen` });
+  }
+  return { list: out, rest: S * 4 - n };
+}
+
 export async function impose(src: ArrayBuffer, o: Opts) {
   const inDoc = await PDFDocument.load(src, { ignoreEncryption: true });
   const n = inDoc.getPageCount();
