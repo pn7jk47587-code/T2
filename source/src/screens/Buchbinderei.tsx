@@ -55,7 +55,13 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       .catch(() => { if (!off) setErr("Die Word-Datei lässt sich nicht lesen."); })
       .finally(() => { if (!off) setBusy(false); });
     return () => { off = true; };
-  }, [word, bookW, bookH, fits, satz.size, satz.numbers]);
+  }, [word, bookW, bookH, fits, satz.size, satz.numbers, satz.stil, satz.schrift, satz.initiale, satz.pergament]);
+
+  const preview = () => {
+    if (!file) return;
+    const url = URL.createObjectURL(new Blob([file.buf], { type: "application/pdf" }));
+    window.open(url, "_blank"); setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
 
   const pl = file ? plan(file.pages, o) : null;
   const sug = file ? suggestions(file.pages, o) : null;
@@ -107,10 +113,24 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
 
       {word ? (
         <>
+          <div className="sheet-label">Gestaltung</div>
+          <Chips v={satz.stil} opts={[["schlicht", "Schlicht"], ["manuskript", "Manuskript"]]} on={(stil) => setSatz({ ...satz, stil })} />
+          {satz.stil === "manuskript" && (
+            <>
+              <div className="sheet-label">Schrift</div>
+              <Chips v={satz.schrift} opts={[["fraktur", "Fraktur"], ["buchschrift", "Buchschrift"]]} on={(schrift) => setSatz({ ...satz, schrift })} />
+              <div className="sheet-label">Zier</div>
+              <div className="bf-chips">
+                <button className={"bf-chip" + (satz.initiale ? " on" : "")} onClick={() => setSatz({ ...satz, initiale: !satz.initiale })}>Illuminierte Initialen</button>
+                <button className={"bf-chip" + (satz.pergament ? " on" : "")} onClick={() => setSatz({ ...satz, pergament: !satz.pergament })}>Pergamentgrund</button>
+              </div>
+            </>
+          )}
           <div className="sheet-label">Schriftgröße</div>
           <div className="hb-num"><button onClick={() => setSatz({ ...satz, size: Math.max(7, satz.size - 0.5) })}>−</button><b>{String(satz.size).replace(".", ",")} pt</b><button onClick={() => setSatz({ ...satz, size: Math.min(16, satz.size + 0.5) })}>+</button></div>
           <div className="sheet-label">Seitenzahlen</div>
           <Chips v={satz.numbers ? "ja" : "nein"} opts={[["ja", "Ja"], ["nein", "Nein"]]} on={(v) => setSatz({ ...satz, numbers: v === "ja" })} />
+          {file && !busy && <button className="au-btn bb-look" onClick={preview}>Satz ansehen</button>}
           {skipped > 0 && <p className="bb-info">{skipped} {skipped === 1 ? "Bild wurde" : "Bilder wurden"} ausgelassen.</p>}
         </>
       ) : (
