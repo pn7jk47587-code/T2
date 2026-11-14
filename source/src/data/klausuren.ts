@@ -16,7 +16,7 @@ export const GEBIETE: { id: Gebiet; titel: string }[] = [
   { id: "oeff", titel: "Öffentliches Recht" },
 ];
 
-const FALL_ZIVIL = "Die Kauffrau Anna Berg verklagt, vertreten durch Rechtsanwalt Dr. Roth, die Müller Bau GmbH (Geschäftsführer Jens Müller, vertreten durch Rechtsanwältin Kern) auf Zahlung von 12.000 € Kaufpreis nebst Verzugszinsen seit dem 1. Februar 2026. Zuständig ist die Zivilkammer 5 des Landgerichts Berlin II, Geschäftsnummer 5 O 112/26. Es entscheidet Richterin am Landgericht Dr. Sommer als Einzelrichterin. Mündliche Verhandlung am 3. März 2026, Verkündung am 24. März 2026.";
+const FALL_ZIVIL = "Die Kauffrau Anna Berg aus Berlin verklagt, vertreten durch Rechtsanwalt Dr. Roth, die Müller Bau GmbH (Geschäftsführer Jens Müller, vertreten durch Rechtsanwältin Kern) auf Zahlung von 12.000 € Kaufpreis nebst Verzugszinsen seit dem 1. Februar 2026. Zuständig ist die Zivilkammer 5 des Landgerichts Berlin II, Geschäftsnummer 5 O 112/26. Es entscheidet Richterin am Landgericht Dr. Sommer als Einzelrichterin. Mündliche Verhandlung am 3. März 2026, Verkündung am 24. März 2026.";
 const FALL_OEFF = "Das Bezirksamt Mitte von Berlin untersagt Herrn Karl Vogt mit Bescheid vom 12. Januar 2026 die Ausübung seines Gewerbes (§ 35 Abs. 1 GewO) und ordnet die sofortige Vollziehung an. Den Widerspruch weist es mit Widerspruchsbescheid vom 20. März 2026 zurück. Herr Vogt klagt, vertreten durch Rechtsanwältin Lenz, vor dem Verwaltungsgericht Berlin, Aktenzeichen VG 4 K 112/26. Die 4. Kammer verhandelt am 9. Juni 2026 mündlich.";
 const FALL_STRAF = "Die Staatsanwaltschaft Berlin wirft dem 34 Jahre alten Tom Kraus vor, am 3. Januar 2026 in Berlin in einem Kaufhaus eine Jacke im Wert von 180 € entwendet zu haben. Die Hauptverhandlung findet am 3. März 2026 vor dem Amtsgericht Tiergarten statt, Strafrichterin ist Richterin am Amtsgericht Dr. Falk. Verteidiger ist Rechtsanwalt Braun.";
 
@@ -51,7 +51,7 @@ export const KLAUSUREN: Klausur[] = [
 5 O 112/26 // Aktenzeichen oben links; kein Verkündungsvermerk, den fertigt der Urkundsbeamte
 {Im Namen des Volkes} // § 311 Abs. 1 ZPO; die Überschrift „Urteil“ ist üblich, zwingend nur bei besonderen Urteilsarten
 In dem {Rechtsstreit}
-der Kauffrau Anna Berg, [Anschrift],
+{der Frau Anna Berg}, {Wohnort}, // Vor- und Nachname und Wohnort; Beruf nur, wenn sie unter einer Firma klagt (KG-Skript B.II.1 und 4)
 {Klägerin}, // Parteistellung rechtsbündig unter der Partei
 {Prozessbevollmächtigter}: Rechtsanwalt Dr. Roth, [Anschrift],
 {gegen}
@@ -94,7 +94,7 @@ Ein Ausspruch zur vorläufigen Vollstreckbarkeit {entfällt}. // Beschlüsse sin
 {Landgericht Berlin II}
 {Beschluss}
 In dem {einstweiligen Verfügungsverfahren|Verfahren auf Erlass einer einstweiligen Verfügung}
-der Kauffrau Anna Berg, [Anschrift],
+der Frau Anna Berg, [Anschrift],
 {Antragstellerin},
 {Verfahrensbevollmächtigter}: Rechtsanwalt Dr. Roth, [Anschrift],
 gegen
@@ -194,7 +194,7 @@ Parteibezeichnung im Eilverfahren: {Antragsteller} und {Antragsgegner}` },
 Kanzlei, per beA, Datum
 {Landgericht Berlin II}
 {Klage}
-der Kauffrau Anna Berg, [Anschrift],
+der Frau Anna Berg, [Anschrift],
 {Klägerin},
 {Prozessbevollmächtigter}: Rechtsanwalt Dr. Roth,
 gegen
