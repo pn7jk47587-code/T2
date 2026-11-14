@@ -726,3 +726,62 @@ input, textarea { font: inherit; color: inherit; }
 .bb-src small, .bb-src-foot small { opacity: .6; }
 .bb-src button { background: none; border: 0; color: inherit; font-size: 22px; opacity: .6; padding: 0 4px; }
 .bb-src-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; }
+
+/* ── Formelbuch ── */
+.fb-unter { margin: -6px 4px 14px; color: var(--text-faint); font-size: 14px; }
+.fb-liste { display: flex; flex-direction: column; gap: 8px; }
+.fb-karte { display: flex; align-items: center; gap: 12px; padding: 10px 14px; text-align: left; width: 100%; }
+.fb-karte span { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fb-karte b { font-size: 16px; }
+.fb-karte small { color: var(--text-faint); font-size: 12.5px; }
+.fb-karte > svg:last-child { width: 26px; height: 26px; color: var(--burgund-hell, #b3243b); flex: none; }
+.fb-siegel .bahn { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 3; }
+.fb-siegel .lauf { fill: none; stroke: var(--burgund-hell, #b3243b); stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray .5s; }
+.fb-siegel text { fill: var(--text); font-family: var(--font-display); font-size: 30px; }
+.fb-siegel.klein { flex: none; }
+.fb-siegel.klein text { font-family: var(--font); font-size: 11px; font-weight: 700; fill: var(--text-dim); }
+.fb-ganz { display: block; margin: 20px auto 0; }
+.fb-quelle { margin: 18px 4px 0; text-align: center; font-size: 12px; color: var(--text-faint); }
+
+.fb-lauf { padding-bottom: 8px; }
+.fb-fortschritt { position: sticky; top: 0; z-index: 3; height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; margin-bottom: 12px; }
+.fb-fortschritt i { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--burgund, #8e1a2e), var(--burgund-hell, #b3243b)); transition: width .35s; }
+.fb-pergament {
+  position: relative; margin-bottom: 14px; padding: 20px 16px 22px; border-radius: 4px; color: #2b1d12;
+  background: radial-gradient(120% 90% at 50% 0%, #f5ecd4, #e9dcba 70%, #dccb9f);
+  box-shadow: inset 0 0 0 1px rgba(120,90,40,.35), inset 0 0 28px rgba(120,80,30,.22), 0 10px 24px rgba(0,0,0,.5);
+  font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; font-size: 15.5px; line-height: 1.5;
+}
+.fb-pergament::before { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(142,26,46,.35); border-radius: 2px; pointer-events: none; }
+.fb-pergament h3 { margin: 0 0 12px; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: 25px; color: #8e1a2e; text-transform: none; letter-spacing: .01em; }
+.fb-fall { margin: 0 0 14px; padding: 10px 12px; font-size: 14px; line-height: 1.45; background: rgba(120,80,30,.1); border-left: 2px solid #8e1a2e; }
+.fb-zeile { margin: 0 0 7px; }
+.fb-zeile p { margin: 0; }
+.fb-zeile small { display: block; margin-top: 1px; font-size: 12.5px; font-style: italic; color: #6d5a3c; }
+.fb-luecke { font-weight: 700; font-style: normal; border-radius: 3px; }
+.fb-luecke.leer { display: inline-block; min-width: 5.5em; height: 1em; vertical-align: baseline; border-bottom: 1.5px dotted #8a7550; }
+.fb-luecke.offen { padding: 1px 6px; color: #8e1a2e; background: rgba(142,26,46,.1); box-shadow: 0 0 0 1.5px #8e1a2e; animation: fb-puls 1.6s ease-in-out infinite; }
+.fb-luecke.recht { color: #23401f; }
+.fb-luecke.fehl { color: #a3201c; text-decoration: underline wavy rgba(163,32,28,.5); text-underline-offset: 3px; }
+.fb-luecke.fest { color: #2b1d12; }
+@keyframes fb-puls { 50% { box-shadow: 0 0 0 1.5px #8e1a2e, 0 0 12px rgba(142,26,46,.45); } }
+
+.fb-pult {
+  position: sticky; bottom: 0; z-index: 4; margin: 0 -16px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(10,10,11,0), var(--bg, #0a0a0b) 22%); backdrop-filter: blur(6px);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.fb-zahl { color: var(--text-faint); font-size: 12px; text-align: center; }
+.fb-feld { width: 100%; font-size: 16px; }
+.fb-knoepfe { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.fb-knoepfe .au-btn { min-width: 0; padding: 11px 20px; }
+.fb-knoepfe .au-btn:disabled { opacity: .45; }
+.fb-knoepfe .bf-chip:first-child { margin-right: auto; }
+.fb-urteil { padding: 10px 14px; border-radius: 12px; background: var(--surface, rgba(255,255,255,.06)); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 3px; }
+.fb-urteil b { font-family: var(--font-display); font-weight: 400; font-size: 20px; }
+.fb-urteil.recht b { color: #8fbf7f; }
+.fb-urteil.fehl b { color: var(--burgund-hell, #d2475c); }
+.fb-urteil span { font-size: 15px; }
+.fb-ende { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 0; text-align: center; }
+.fb-ende h2 { margin: 6px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 34px; }
+.fb-ende p { margin: 0 0 10px; color: var(--text-dim); }

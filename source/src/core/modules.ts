@@ -101,6 +101,14 @@ export const modules: ModuleDef[] = [
     feeds: [],
   },
   {
+    id: "formelbuch",
+    title: "Formelbuch",
+    icon: "formelbuch",
+    a: "var(--umber)",
+    b: "var(--clay)",
+    feeds: [],
+  },
+  {
     id: "heldenbuch",
     title: "Heldenbuch",
     icon: "heldenbuch",

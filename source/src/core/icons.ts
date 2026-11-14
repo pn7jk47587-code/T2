@@ -19,6 +19,8 @@ export const ICONS: Record<string, string[]> = {
   tagwerk: ["M3 18h18", "M7 18a5 5 0 0 1 10 0", "M12 8.5V5.5M6.2 11.2 4.4 9.4M17.8 11.2l1.8-1.8M2.8 14.5h1.4M19.8 14.5h1.4", "M12 18l2.6-3.4"],
   /** Zwanzigseitiger Würfel */
   heldenbuch: ["M12 2.5 20.2 7.2v9.6L12 21.5 3.8 16.8V7.2Z", "M12 2.5 7.6 10.2h8.8Z", "M7.6 10.2 12 17.6l4.4-7.4", "M3.8 7.2l3.8 3M20.2 7.2l-3.8 3M3.8 16.8 7.6 10.2M20.2 16.8l-3.8-6.6M12 17.6v3.9M3.8 16.8 12 17.6l8.2-.8"],
+  /** Federkiel über einer Urkunde */
+  formelbuch: ["M20.5 3.2C13.4 3.8 8.6 8 7 15.6c5.4-.6 10.2-3.9 13.5-12.4Z", "M4.2 20.6 13.6 10", "M9.2 13.3l3.9-.5M10.6 10.3l4.3-.6", "M4.2 20.6h8.6"],
   /** Schwert über aufgeschlagenem Buch */
   aufruesten: ["M3.5 14.8c3-.4 5.5 0 8.5 1.5 3-1.5 5.5-1.9 8.5-1.5v4.6c-3-.4-5.5 0-8.5 1.5-3-1.5-5.5-1.9-8.5-1.5Z", "M12 16.3v4.6", "M12 2.5v9.5", "M9.2 10.2h5.6", "M12 12v1.8"],
   /** Apothekerzeichen: Schale der Hygieia mit Schlange */
