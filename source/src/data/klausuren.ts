@@ -49,7 +49,8 @@ export const KLAUSUREN: Klausur[] = [
       { id: "rubrum", titel: "Rubrum", fall: FALL_ZIVIL, text: `
 {Landgericht Berlin II}
 5 O 112/26 // Aktenzeichen oben links; kein Verkündungsvermerk, den fertigt der Urkundsbeamte
-{Im Namen des Volkes} // § 311 Abs. 1 ZPO; die Überschrift „Urteil“ ist üblich, zwingend nur bei besonderen Urteilsarten
+{Im Namen des Volkes} // § 311 Abs. 1 ZPO
+{Urteil} // Überschrift unter „Im Namen des Volkes“; zwingend nur bei besonderen Urteilsarten wie Versäumnis- oder Teilurteil
 In dem {Rechtsstreit}
 {der Frau Anna Berg}, {Wohnort}, // Vor- und Nachname und Wohnort; Beruf nur, wenn sie unter einer Firma klagt (KG-Skript B.II.1 und 4)
 {Klägerin}, // Parteistellung rechtsbündig unter der Partei
