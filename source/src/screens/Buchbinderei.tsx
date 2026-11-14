@@ -15,6 +15,19 @@ function save(bytes: Uint8Array, name: string) {
 type Src = { id: string; name: string; kind: "pdf" | "docx"; buf: ArrayBuffer };
 const lbl = (n: number | null) => (n === null ? "–" : String(n + 1));
 
+// PDF robust laden: Vorspann vor „%PDF“ abschneiden, strenge Prüfung lockern
+async function ladePdf(buf: ArrayBuffer | Uint8Array) {
+  const { PDFDocument } = await import("pdf-lib");
+  let u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  const kopf = new TextDecoder("latin1").decode(u8.subarray(0, Math.min(u8.length, 4096))).indexOf("%PDF");
+  if (kopf > 0) u8 = u8.subarray(kopf);
+  let last: unknown;
+  for (const opt of [{ ignoreEncryption: true }, { ignoreEncryption: true, throwOnInvalidObject: false, updateMetadata: false }]) {
+    try { return await PDFDocument.load(u8.slice(), opt); } catch (e) { last = e; }
+  }
+  throw last;
+}
+
 export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }) {
   const [raw, setRaw] = useStored<Opts>("buchbinderei", DEFAULT_OPTS);
   const o: Opts = { ...DEFAULT_OPTS, ...raw };
@@ -42,10 +55,9 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       if (/\.docx$/i.test(f.name)) { next.push({ id, name: f.name.replace(/\.docx$/i, ""), kind: "docx", buf: await f.arrayBuffer() }); continue; }
       try {
         const buf = await f.arrayBuffer();
-        const { PDFDocument } = await import("pdf-lib");
-        await PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+        await ladePdf(buf);
         next.push({ id, name: f.name.replace(/\.pdf$/i, ""), kind: "pdf", buf });
-      } catch { setErr(`„${f.name}“ lässt sich nicht als PDF lesen.`); }
+      } catch (e) { setErr(`„${f.name}“ lässt sich nicht als PDF lesen (${e instanceof Error ? e.message.slice(0, 90) : "unbekannt"}).`); }
     }
     if (next.length) setSrcs((s) => [...s, ...next]);
   };
@@ -71,7 +83,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
           const r = await docxToPdf(x.buf.slice(0), { pageW: bookW, pageH: bookH, ...satz, firstPage: out.getPageCount() + 1 });
           bytes = r.bytes; sk += r.skipped;
         }
-        const d = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        const d = await ladePdf(bytes);
         (await out.copyPages(d, d.getPageIndices())).forEach((pg) => out.addPage(pg));
         c[x.id] = d.getPageCount();
       }
@@ -80,7 +92,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       setFile({ name: srcs.length === 1 ? srcs[0].name : "Buch", buf: u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength) as ArrayBuffer, pages: out.getPageCount() });
       setCounts(c); setSkipped(sk);
     })()
-      .catch(() => { if (!off) setErr("Eine der Dateien lässt sich nicht lesen."); })
+      .catch((e) => { if (!off) setErr(`Eine der Dateien lässt sich nicht lesen (${e instanceof Error ? e.message.slice(0, 90) : "unbekannt"}).`); })
       .finally(() => { if (!off) setBusy(false); });
     return () => { off = true; };
   }, [srcs, bookW, bookH, fits, satz.size, satz.numbers, satz.stil, satz.schrift, satz.initiale, satz.pergament]);
