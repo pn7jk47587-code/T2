@@ -97,8 +97,8 @@ function Abfrage({ k, us, nur, fix, setFix, merke, ende, nochmal }: {
 
   useEffect(() => {
     document.querySelector(".fb-luecke.jetzt")?.scrollIntoView({ block: "center", behavior: "smooth" });
-    if (phase === "frage") feld.current?.focus({ preventScroll: true });
-  }, [i, phase]);
+    if (edit === null) feld.current?.focus({ preventScroll: true });
+  }, [i, phase, edit]);
 
   const setze = (v: 0 | 1) => { setErg((e) => ({ ...e, [akt.key]: v })); merke(akt.key, v); };
   const pruefe = () => {
@@ -156,10 +156,18 @@ function Abfrage({ k, us, nur, fix, setFix, merke, ende, nochmal }: {
 
       <div className="fb-pult">
         <small className="fb-zahl">{i + 1} / {reihe.length}</small>
+        <input ref={feld} className="sheet-in fb-feld" value={text} placeholder="Antwort" autoCapitalize="off" autoCorrect="off" autoComplete="off" spellCheck={false}
+          enterKeyHint={phase === "frage" ? "done" : "next"}
+          onChange={(e) => { if (phase === "frage") setText(e.target.value); }}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            if (phase === "frage") pruefe();
+            else if (phase === "gezeigt") { setze(0); weiter(); }
+            else weiter();
+          }} />
         {phase === "frage" ? (
           <>
-            <input ref={feld} className="sheet-in fb-feld" value={text} placeholder="Antwort" autoCapitalize="off" autoCorrect="off" autoComplete="off" spellCheck={false}
-              onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && pruefe()} />
             <div className="fb-knoepfe">
               <button className="bf-chip" onClick={() => setTipp(true)}>Wink</button>
               <button className="bf-chip" onClick={() => setPhase("gezeigt")}>Aufdecken</button>
@@ -182,7 +190,7 @@ function Abfrage({ k, us, nur, fix, setFix, merke, ende, nochmal }: {
                   <button className="au-btn" onClick={() => { setze(0); weiter(); }}>Nicht gewusst</button>
                   <button className="au-btn primary" onClick={() => { setze(1); weiter(); }}>Gewusst</button>
                 </>
-              ) : <button className="au-btn primary" autoFocus onClick={weiter}>Weiter</button>}
+              ) : <button className="au-btn primary" onClick={weiter}>Weiter</button>}
             </div>
           </>
         )}
