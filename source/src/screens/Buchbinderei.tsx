@@ -12,7 +12,7 @@ function save(bytes: Uint8Array, name: string) {
   const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 8000);
 }
-type Src = { id: string; name: string; kind: "pdf" | "docx"; buf: ArrayBuffer };
+type Src = { id: string; name: string; kind: "pdf" | "docx"; buf: ArrayBuffer; pages?: number };
 const lbl = (n: number | null) => (n === null ? "–" : String(n + 1));
 
 // PDF robust laden: Vorspann vor „%PDF“ abschneiden, strenge Prüfung lockern
@@ -23,7 +23,7 @@ async function ladePdf(buf: ArrayBuffer | Uint8Array) {
   if (kopf > 0) u8 = u8.subarray(kopf);
   let last: unknown;
   for (const opt of [{ ignoreEncryption: true }, { ignoreEncryption: true, throwOnInvalidObject: false, updateMetadata: false }]) {
-    try { return await PDFDocument.load(u8.slice(), opt); } catch (e) { last = e; }
+    try { return await PDFDocument.load(u8, opt); } catch (e) { last = e; }
   }
   throw last;
 }
@@ -55,8 +55,8 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
       if (/\.docx$/i.test(f.name)) { next.push({ id, name: f.name.replace(/\.docx$/i, ""), kind: "docx", buf: await f.arrayBuffer() }); continue; }
       try {
         const buf = await f.arrayBuffer();
-        await ladePdf(buf);
-        next.push({ id, name: f.name.replace(/\.pdf$/i, ""), kind: "pdf", buf });
+        const d = await ladePdf(buf);
+        next.push({ id, name: f.name.replace(/\.pdf$/i, ""), kind: "pdf", buf, pages: d.getPageCount() });
       } catch (e) { setErr(`„${f.name}“ lässt sich nicht als PDF lesen (${e instanceof Error ? e.message.slice(0, 90) : "unbekannt"}).`); }
     }
     if (next.length) setSrcs((s) => [...s, ...next]);
@@ -71,6 +71,12 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
   useEffect(() => {
     if (!srcs.length) { setFile(null); return; }
     if (hasWord && !fits) return;
+    // Eine einzelne PDF-Datei wird nicht neu zusammengesetzt: kein zweites Einlesen, keine Kopie
+    if (srcs.length === 1 && srcs[0].kind === "pdf" && srcs[0].pages) {
+      const x = srcs[0];
+      setFile({ name: x.name, buf: x.buf, pages: x.pages! }); setCounts({ [x.id]: x.pages! }); setSkipped(0); setErr("");
+      return;
+    }
     let off = false;
     setBusy(true); setErr("");
     (async () => {
@@ -111,7 +117,7 @@ export function Buchbinderei({ mod, back }: { mod: ModuleDef; back: () => void }
     if (!file) return;
     setBusy(true); setGoing(true); setErr("");
     try {
-      const r = await impose(file.buf.slice(0), hasPdf ? o : { ...o, fill: "original" });
+      const r = await impose(file.buf, hasPdf ? o : { ...o, fill: "original" });
       if (o.split) { save(r.bytes[0], `${file.name}-schoendruck.pdf`); setTimeout(() => save(r.bytes[1], `${file.name}-widerdruck.pdf`), 600); }
       else save(r.bytes[0], `${file.name}-ausgeschossen.pdf`);
     } catch (e) { setErr(e instanceof Error ? e.message : "Ausschießen fehlgeschlagen."); }
