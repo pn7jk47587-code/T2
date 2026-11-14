@@ -124,8 +124,10 @@ function Abfrage({ k, us, nur, fix, setFix, merke, ende, nochmal }: {
 
   const zeile = (z: Zeile, n: number) => {
     const offen = z.luecken.some((l) => { const pos = reihe.indexOf(l); return pos > i || (pos === i && phase === "frage"); });
+    const klar = z.teile.map((t) => ("t" in t ? t.t : loesung(t.l)[0])).join("").trim();
+    const rechts = /^(Kläger|Beklagte|Antragsteller|Antragsgegner|Berufungskläger|Berufungsbeklagte|Widerkläger|Widerbeklagte|Beschwerdeführer|Angeklagte|Revisionskläger|Streithelfer|Beigeladene)\w*,?$/.test(klar);
     return (
-      <div key={n} className="fb-zeile" style={{ paddingLeft: z.ebene * 16 }}>
+      <div key={n} className={"fb-zeile" + (rechts ? " rechts" : "") + (/^(Im Namen des Volkes|Urteil|Beschluss|Klage|Anklageschrift)$/.test(klar) ? " mitte" : "")} style={{ paddingLeft: rechts ? 0 : z.ebene * 18 }}>
         <p>
           {z.teile.map((t, m) => {
             if ("t" in t) return <span key={m}>{t.t}</span>;
@@ -145,11 +147,11 @@ function Abfrage({ k, us, nur, fix, setFix, merke, ende, nochmal }: {
     <div className="fb-lauf">
       <div className="fb-fortschritt"><i style={{ width: `${(i / reihe.length) * 100}%` }} /></div>
       {blaetter.map(({ u, zeilen }) => (
-        <article key={u.id} className="fb-pergament">
-          <h3>{u.titel}</h3>
+        <div key={u.id}>
+          <h3 className="fb-kopf">{u.titel}</h3>
           {u.fall && <p className="fb-fall">{u.fall}</p>}
-          {zeilen.map(zeile)}
-        </article>
+          <article className="fb-pergament">{zeilen.map(zeile)}</article>
+        </div>
       ))}
 
       <div className="fb-pult">
