@@ -1,17 +1,17 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Home } from "./screens/Home";
-import { Stile } from "./screens/Stile";
 import { screenFor } from "./screens";
 import { getModule } from "./core/modules";
 import { useStored } from "./core/db";
 import { Backdrop, Particles } from "./components/Scenery";
 import { Jetzt } from "./components/Jetzt";
 import { applyFont } from "./core/fonts";
-import { Entwurf } from "./screens/Entwurf";
-import { Wappen } from "./screens/Wappen";
-import { Kacheln } from "./screens/Kacheln";
 import { getSkin, NavCtx, SkinCtx } from "./core/skins";
 
+const Stile = lazy(() => import("./screens/Stile").then((m) => ({ default: m.Stile })));
+const Entwurf = lazy(() => import("./screens/Entwurf").then((m) => ({ default: m.Entwurf })));
+const Wappen = lazy(() => import("./screens/Wappen").then((m) => ({ default: m.Wappen })));
+const Kacheln = lazy(() => import("./screens/Kacheln").then((m) => ({ default: m.Kacheln })));
 const Ruestkammer = lazy(() => import("./screens/Ruestkammer").then((m) => ({ default: m.Ruestkammer })));
 
 /**
@@ -71,6 +71,7 @@ export default function App() {
         <Backdrop skinId={skin.id} />
         <Particles mode={skin.particles} skinId={skin.id} />
         <div className="app">
+          <Suspense fallback={null}>
           {id === "kacheln" ? (
             <Kacheln back={() => go("einstellungen")} />
           ) : id === "wappen" ? (
@@ -84,6 +85,7 @@ export default function App() {
           ) : (
             <Home go={go} />
           )}
+          </Suspense>
         </div>
           </>
         )}

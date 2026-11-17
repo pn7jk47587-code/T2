@@ -211,7 +211,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
     /* Harnisch laden und stahlgrau einfärben */
     const pickables: THREE.Mesh[] = [];
     const byPart = new Map<string, THREE.Mesh[]>();
-    const draco = new DRACOLoader(); draco.setDecoderPath("./draco/"); draco.setDecoderConfig({ type: "js" });
+    const draco = new DRACOLoader(); draco.setDecoderPath("./draco/");
     const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
     const onLoad = (gltf: { scene: THREE.Group }) => {
       if (disposed) return;
