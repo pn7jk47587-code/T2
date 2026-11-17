@@ -128,10 +128,10 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
   const [sel, setSel] = useState<string | null>(null);
   const [diving, setDiving] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [profile] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
+  const [profile, , pReady] = useStored<Profile>("profile", { name: "Dein Name", mottos: [] });
   const skin = useSkin();
   const ov = useOverviewValues();
-  const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [arms, , aReady] = useStored<Arms>("wappen", DEFAULT_ARMS);
   const [rem] = useStored<Reminder[]>("erinnerungen", []);
   const [cyc] = useStored<CycleLog>("zyklus", {});
   const [feel] = useStored<FeelingLog>("gefuehle", {});
@@ -431,7 +431,7 @@ export function Ruestkammer({ back, go }: { back?: () => void; go: (id: string) 
       <div className="rk" data-skin={skin.id}>
         <div className={"rk-canvas" + (loaded ? " ready" : "")} ref={mount} />
         <div className={"rk-top" + (sel ? " hide" : "")}>
-          <div className="rk-id">
+          <div className="rk-id" style={{ visibility: pReady && aReady ? undefined : "hidden" }}>
             <button className="arms-main small" style={{ pointerEvents: "auto" }} onClick={() => go("einstellungen")} aria-label="Erlasse"><CoatOfArms arms={arms} /></button>
             <div className="rk-name">{profile.name}</div>
             {motto && <div className="rk-motto">{motto}</div>}

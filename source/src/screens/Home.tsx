@@ -25,11 +25,13 @@ function today() {
 }
 
 export function Home({ go }: { go: (id: string) => void }) {
-  const [profile] = useStored<Profile>("profile", defaultProfile);
+  const [profile, , pReady] = useStored<Profile>("profile", defaultProfile);
   const [mottoIdx, setMottoIdx] = useStored<number>("mottoIdx", 0);
   const skin = useSkin();
   const ov = useOverviewValues();
-  const [arms] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [arms, , aReady] = useStored<Arms>("wappen", DEFAULT_ARMS);
+  const [mReady] = useStored<number>("mottoIdx", 0).slice(2) as [boolean];
+  const bereit = pReady && aReady && mReady;
   const [tileStyle] = useStored<string>("tileStyle", "siegel");
   const gid = useId().replace(/:/g, "");
   const shield = skin.shield && tileStyle === "stil" ? getShield(skin.shield) : null;
@@ -39,7 +41,7 @@ export function Home({ go }: { go: (id: string) => void }) {
 
   return (
     <>
-      <header className="profile">
+      <header className="profile" style={{ visibility: bereit ? undefined : "hidden" }}>
         <button className="arms-main" onClick={() => go("einstellungen")} aria-label="Erlasse">
           <CoatOfArms arms={arms} />
         </button>
