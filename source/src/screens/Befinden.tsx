@@ -14,6 +14,11 @@ interface HealthDay {
   note?: string;
 }
 type HealthLog = Record<string, HealthDay>;
+interface Trunk { id: string; name: string; tage: number }
+const TURNI: [number, string][] = [[1, "Täglich"], [7, "Wöchentlich"], [14, "Alle 2 Wochen"], [30, "Monatlich"]];
+const MS = 86400000;
+const tageZwischen = (a: string, b: string) => Math.round((new Date(b + "T12:00:00").getTime() - new Date(a + "T12:00:00").getTime()) / MS);
+const kurz = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric" });
 
 const STATES: { id: State; name: string }[] = [{ id: "gesund", name: "Gesund" }, { id: "angeschlagen", name: "Angeschlagen" }, { id: "krank", name: "Krank" }];
 const BASE_SYMPTOMS = ["Schleim im Hals", "Halsschmerzen", "Husten", "Schnupfen", "Fieber", "Muskelkater", "Übelkeit", "Erschöpfung"];
@@ -30,6 +35,25 @@ export function Befinden({ mod, back }: { mod: ModuleDef; back: () => void }) {
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [newSym, setNewSym] = useState("");
   const [newMed, setNewMed] = useState("");
+  const [trunke, setTrunke] = useStored<Trunk[]>("befindenTrunke", []);
+  const [nahm, setNahm] = useStored<Record<string, string[]>>("befindenTrunkLog", {});
+  const [newTrunk, setNewTrunk] = useState("");
+  const [newTage, setNewTage] = useState(1);
+  const nimm = (id: string) => setNahm((p) => {
+    const cur = p[day] ?? [];
+    const nxt = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+    const out = { ...p };
+    if (nxt.length) out[day] = nxt; else delete out[day];
+    return out;
+  });
+  const stand = (t: Trunk) => {
+    const daten = Object.keys(nahm).filter((d) => nahm[d].includes(t.id) && d <= today).sort();
+    const zuletzt = daten[daten.length - 1];
+    if (!zuletzt) return "noch nie genommen";
+    const faellig = t.tage - tageZwischen(zuletzt, today);
+    const wann = zuletzt === today ? "heute genommen" : `zuletzt ${kurz(zuletzt)}`;
+    return `${wann} · ${faellig > 1 ? `fällig in ${faellig} Tagen` : faellig === 1 ? "morgen fällig" : faellig === 0 ? "heute fällig" : "überfällig"}`;
+  };
 
   const e: HealthDay = log[day] ?? {};
   const update = (patch: Partial<HealthDay>) => setLog((p) => {
@@ -148,6 +172,25 @@ export function Befinden({ mod, back }: { mod: ModuleDef; back: () => void }) {
 
         <div className="zy-label">Notiz</div>
         <textarea className="sheet-in bf-note" rows={2} value={e.note ?? ""} onChange={(ev) => update({ note: ev.target.value || undefined })} />
+      </div>
+      <div className="section eyebrow">Heiltrünke</div>
+      <div className="card zy-block">
+        {trunke.map((t) => (
+          <div key={t.id} className="bf-trunk">
+            <button className={"bf-chip" + (nahm[day]?.includes(t.id) ? " on" : "")} onClick={() => nimm(t.id)}>{t.name}</button>
+            <small>{TURNI.find(([n]) => n === t.tage)?.[1] ?? `Alle ${t.tage} Tage`} · {stand(t)}</small>
+            <button className="bf-x" aria-label="Entfernen" onClick={() => { setTrunke((p) => p.filter((x) => x.id !== t.id)); setNahm((p) => Object.fromEntries(Object.entries(p).map(([d, a]) => [d, a.filter((x) => x !== t.id)]).filter(([, a]) => (a as string[]).length))); }}>×</button>
+          </div>
+        ))}
+        <form className="bf-add" onSubmit={(ev) => { ev.preventDefault(); const v = newTrunk.trim(); if (!v) return; setTrunke((p) => [...p, { id: String(Date.now()), name: v, tage: newTage }]); setNewTrunk(""); setNewTage(1); }}>
+          <input className="sheet-in" value={newTrunk} onChange={(ev) => setNewTrunk(ev.target.value)} placeholder="Neuer Trunk" />
+          {newTrunk.trim() && <button className="bf-add-btn" type="submit">Hinzufügen</button>}
+        </form>
+        {newTrunk.trim() && (
+          <div className="bf-chips" style={{ marginTop: 10 }}>
+            {TURNI.map(([n, name]) => <button key={n} className={"bf-chip" + (newTage === n ? " on" : "")} onClick={() => setNewTage(n)}>{name}</button>)}
+          </div>
+        )}
       </div>
     </Shell>
   );

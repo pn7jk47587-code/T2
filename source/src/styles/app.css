@@ -785,3 +785,7 @@ input, textarea { font: inherit; color: inherit; }
 .fb-ende { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 0; text-align: center; }
 .fb-ende h2 { margin: 6px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 34px; }
 .fb-ende p { margin: 0 0 10px; color: var(--text-dim); }
+
+.bf-trunk { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 10px; margin-bottom: 10px; }
+.bf-trunk small { color: var(--text-faint); font-size: 12.5px; }
+.bf-x { width: 28px; height: 28px; border-radius: 50%; color: var(--text-faint); font-size: 18px; line-height: 1; }
